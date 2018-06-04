@@ -1,0 +1,3 @@
+Number of neurons: 3
+Reaction Time: 0.000000
+Accuracy: 0.000000
