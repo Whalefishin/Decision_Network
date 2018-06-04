@@ -187,7 +187,7 @@ void Network::constructRegularNetwork(int k){
 //         for (int j=0;j<num_neurons;j++){
 //             //r is a random float in [0,1]
 //             float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-//             if (r >= thresholdProb){
+//             if (r <= thresholdProb){
 //                 insertUndirectedConnection(i,j);
 //             }
 //         }
@@ -209,7 +209,21 @@ void Network::constructRandomNetwork(int p){
 void Network::constructSmallWorldNetwork(int k, double p){
     constructRegularNetwork(k);
     //rewire
-    
+    for (int n=0;n<num_neurons;n++){
+        for (int i =1;i<=k/2;i++){ //assume k to be even
+            //r is a random float in [0,1]
+            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            if (r <= p){
+                removeUndirectedConnection(n,n+i);
+                //j is the index for the neuron to rewire to
+                int j = rand() % num_neurons;
+                while (j==n){ //make sure j is not n, the same neuron
+                    j = rand() % num_neurons;
+                }
+                insertUndirectedConnection(n,j);
+            }
+        }
+    }
 }
 
 void Network::constructAllToAllNetwork(){

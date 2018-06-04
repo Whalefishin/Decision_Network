@@ -93,14 +93,21 @@ int main(){
     vector<double> w_Vector_3D;
     vector<double> N_Vector_3D;
     vector<double> Acc_Vector_3D;
+    vector<double> diff_Vector_3D;
 
     for (int i=1;i<=num_outer_loop;i++){
+        //double N = 10;
         double N = i*10;
+        //double diff = (i-1)*0.1;
+        //double diff = 0.5;
         for (int j=1;j<=num_inner_loop;j++){
-            double w = j-1;
+            double w = 1.0;
+            //double w = j-1;
+            double diff = (j-1)*0.1;
             Network network_3D(N,w,1,0.01);
             network_3D.constructAllToAllNetwork();
-            network_3D.initialize(0.5);
+            network_3D.initialize(diff);
+            //network_3D.initialize(0.5);
             for (int k = 0;k<update_times_3D;k++){
                 network_3D.updateIntegrateAll(&Neuron::sigmActiv);
                 if (k==update_times_3D-1){
@@ -109,6 +116,7 @@ int main(){
             }
             N_Vector_3D.push_back(N);
             w_Vector_3D.push_back(w);
+            diff_Vector_3D.push_back(diff);
             Acc_Vector_3D.push_back(network_3D.Acc);
         }
     }
@@ -127,7 +135,7 @@ int main(){
     ofstream w_Data_3D("Data/3D_w.txt");
     ofstream N_Data_3D("Data/3D_N.txt");
     ofstream Acc_Data_3D("Data/3D_Acc.txt");
-
+    ofstream diff_Data_3D("Data/3D_diff.txt");
 
     for (int i=0;i<n1->t_data.size();i++){
         timeData << n1->t_data[i] << endl;
@@ -145,6 +153,7 @@ int main(){
         w_Data_3D << w_Vector_3D[i] << endl;
         N_Data_3D << N_Vector_3D[i] << endl;
         Acc_Data_3D << Acc_Vector_3D[i] << endl;
+        diff_Data_3D << diff_Vector_3D[i] << endl;
     }
 
     //single network
