@@ -46,6 +46,7 @@ class Neuron{
     vector<double> RT_vector; //for efficiency
     int RT_history; //number of history wanted.
     bool RT_collected;
+    int RT_Count;
 
     vector<double> x_data;
     vector<double> t_data;

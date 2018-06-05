@@ -36,6 +36,11 @@ class Network{
     void constructSmallWorldNetwork(int k, double p); //p is the rewiring prob.
     void constructAllToAllNetwork();
 
+    double computeCharacteristicPathLength();
+    double computeGlobalClusteringCoefficient();
+
+    double** outputAdjacencyMtx();
+
     //fields
     int num_neurons;
     vector<Neuron*> neuron_vector; //contains all the neurons

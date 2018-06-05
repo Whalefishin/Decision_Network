@@ -16,9 +16,10 @@ double x_0, double t_0, double h){
 
     update_count =0;
     RT_sum = 0;
-    RT_threshold = 0.005;
-    RT_history = 2500;
+    RT_threshold = 0.001;
+    RT_history = 2000;
     RT_collected = false;
+    RT_Count = 0;
 
     x_data.push_back(x);
     t_data.push_back(t);
@@ -39,12 +40,22 @@ void Neuron::updateRK4(double (Neuron::*f)(double)){
     double k_4 = h * computeRHS(this->t + (h), this->x + (k_3), (f));
 
     //data collection for Reaction Time
+    // if (!RT_collected){
+    //     RT_sum += fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
+    //     //RT_vector.push_back(fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0));
+    //     if (update_count > RT_history){
+    //         //RT_sum -= RT_vector[0];
+    //         //RT_vector.erase(RT_vector.begin());
+    //     }
+    // }
+
     if (!RT_collected){
-        RT_sum += fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
-        RT_vector.push_back(fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0));
-        if (update_count > RT_history){
-            RT_sum -= RT_vector[0];
-            RT_vector.erase(RT_vector.begin());
+        double d = fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
+        if (d < RT_threshold){
+            RT_Count++;
+        }
+        else{
+            RT_Count = 0;
         }
     }
 
@@ -82,12 +93,22 @@ void Neuron::updateRK4IntegrateAll(double (Neuron::*f)(double)){
     double k_3 = h * computeRHSIntegrateAll(this->t + (h/2.0), this->x + (k_2/2.0), (f));
     double k_4 = h * computeRHSIntegrateAll(this->t + (h), this->x + (k_3), (f));
 
+    // if (!RT_collected){
+    //     RT_sum += fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
+    //     RT_vector.push_back(fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0));
+    //     if (update_count > RT_history){
+    //         RT_sum -= RT_vector[0];
+    //         RT_vector.erase(RT_vector.begin());
+    //     }
+    // }
+
     if (!RT_collected){
-        RT_sum += fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
-        RT_vector.push_back(fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0));
-        if (update_count > RT_history){
-            RT_sum -= RT_vector[0];
-            RT_vector.erase(RT_vector.begin());
+        double d = fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
+        if (d < RT_threshold){
+            RT_Count++;
+        }
+        else{
+            RT_Count = 0;
         }
     }
 

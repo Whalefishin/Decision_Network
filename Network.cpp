@@ -42,12 +42,15 @@ void Network::update(double (Neuron::*f)(double)){
     for (int i =0; i<num_neurons;i++){
         Neuron* toUpdate = neuron_vector[i];
         toUpdate->updateRK4(f);
-        if (toUpdate->update_count > toUpdate->RT_history){
-            if (toUpdate->RT_sum > toUpdate->RT_threshold){ //not yet RT
-                RT_achieved = false;
-            }
-        }
-        else{
+        // if (toUpdate->update_count > toUpdate->RT_history){
+        //     if (toUpdate->RT_sum > toUpdate->RT_threshold){ //not yet RT
+        //         RT_achieved = false;
+        //     }
+        // }
+        // else{
+        //     RT_achieved = false;
+        // }
+        if (toUpdate->RT_Count < toUpdate->RT_history){
             RT_achieved = false;
         }
     }
@@ -77,12 +80,7 @@ void Network::updateIntegrateAll(double (Neuron::*f)(double)){
     for (int i =0; i<num_neurons;i++){
         Neuron* toUpdate = neuron_vector[i];
         toUpdate->updateRK4IntegrateAll(f);
-        if (toUpdate->update_count > toUpdate->RT_history){
-            if (toUpdate->RT_sum > toUpdate->RT_threshold){ //not yet RT
-                RT_achieved = false;
-            }
-        }
-        else{
+        if (toUpdate->RT_Count < toUpdate->RT_history){
             RT_achieved = false;
         }
     }
@@ -177,6 +175,16 @@ void Network::constructRegularNetwork(int k){
             }
         }
     }
+}
+
+double** outputAdjacencyMtx(){
+    double** ret = new double[num_neurons];
+    for (int i=0;i<num_neurons;i++){
+        ret[i] = new double[num_neurons];
+    }
+
+    
+
 }
 
 
