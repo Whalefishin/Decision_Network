@@ -39,7 +39,7 @@ class Network{
     double computeCharacteristicPathLength();
     double computeGlobalClusteringCoefficient();
 
-    double** outputAdjacencyMtx();
+    int** outputAdjacencyMtx();
 
     //fields
     int num_neurons;
