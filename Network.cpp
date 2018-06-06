@@ -178,7 +178,6 @@ void Network::constructRegularNetwork(int k){
 }
 
 int** Network::outputAdjacencyMtx(){
-    
     int** J = new int*[num_neurons];
     for (int i=0;i<num_neurons;i++){
         J[i] = new int[num_neurons];
@@ -193,10 +192,11 @@ int** Network::outputAdjacencyMtx(){
     for (int i=0;i<num_neurons;i++){
         Neuron* n = neuron_vector[i];
         for (int j=0;j<n->neighbors.size();j++){
-            J[i][j] = 1;
+            Neuron* neighbor = n->neighbors[j];
+            J[i][neighbor->number] = 1;
         }
     }
-
+    
     return J;
 
 }
@@ -216,7 +216,7 @@ int** Network::outputAdjacencyMtx(){
 //     }
 // }
 
-void Network::constructRandomNetwork(int p){
+void Network::constructRandomNetwork(double p){
     for (int i=0;i<num_neurons;i++){
         for (int j=i+1;j<num_neurons;j++){
             //r is a random float in [0,1]

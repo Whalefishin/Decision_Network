@@ -8,9 +8,11 @@
 using namespace std;
 
 int main(){
+    //fixed random seed for consistency
     srand(6);
 
-    Network* network = new Network(3,5,1,0.01);
+    int single_Network_neurons = 5;
+    Network* network = new Network(single_Network_neurons,5,1,0.01);
 
     Neuron* n1 = network->neuron_vector[0];
     Neuron* n2 = network->neuron_vector[1];
@@ -20,6 +22,7 @@ int main(){
     // n1->S = 0.35; //so n1 should be the winner.
     // n2->S = 0.3;
 
+    //network->constructRandomNetwork(0.5);
     network->constructAllToAllNetwork();
     // for (int i =0;i<network->num_neurons;i++){
     //     network->insertUndirectedConnection(0,i);
@@ -43,6 +46,8 @@ int main(){
             network->computeAccuracy();
         }
     }
+
+    int** J = network->outputAdjacencyMtx();
 
     cout << "RT: " + to_string(network->RT) << endl;
     cout << "Accuracy: " + to_string(network->Acc) << endl;
@@ -86,9 +91,9 @@ int main(){
 
 
     //3D plots
-    int num_outer_loop = 50;
-    int num_inner_loop = 20;
-    int update_times_3D = 10000;
+    int num_outer_loop = 10;
+    int num_inner_loop = 10;
+    int update_times_3D = 10;
 
     vector<double> w_Vector_3D;
     vector<double> N_Vector_3D;
@@ -128,6 +133,7 @@ int main(){
     ofstream timeData("Data/Time.txt");
     ofstream x1Data("Data/x1.txt");
     ofstream x2Data("Data/x2.txt");
+    ofstream JmtxData("Data/J.txt");
     ofstream singleNetworkParameters("Data/SingleNetworkParameters.txt");
     
     ofstream wData("Data/w.txt");
@@ -164,7 +170,20 @@ int main(){
     singleNetworkParameters << "Number of neurons: " + to_string(network->num_neurons) << endl;
     singleNetworkParameters << "Reaction Time: " + to_string(network->RT) << endl;
     singleNetworkParameters << "Accuracy: " + to_string(network->Acc) << endl;
+    //J mtx
+    for (int i=0;i<single_Network_neurons;i++){
+        for (int j=0;j<single_Network_neurons;j++){
+            JmtxData << to_string(J[i][j]) + " ";
+        }
+        JmtxData << endl;
+    }
 
+    for (int i=0;i<single_Network_neurons;i++){
+        delete[] J[i];
+    }
+    delete[] J;
+
+    delete network;
 
     return 0;
 }

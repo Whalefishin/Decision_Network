@@ -12,7 +12,7 @@ class Neuron{
     Neuron(int number, double S, double lambda, double w, 
     double x_0, double t_0, double h);
 
-    ~Neuron();
+    //~Neuron();
 
     void updateRK4(double (Neuron::*f)(double)); //parameter specifies which activiation fcn to use.
     double computeRHS(double t, double x,double (Neuron::*f)(double));

@@ -32,7 +32,7 @@ class Network{
 
     void initialize(double diff); //use this for schematic initialization. diff is the difference in S btw winner and others
     void constructRegularNetwork(int k); //k is the mean degree, assumed to be even
-    void constructRandomNetwork(int k); //k is the mean degree
+    void constructRandomNetwork(double p);
     void constructSmallWorldNetwork(int k, double p); //p is the rewiring prob.
     void constructAllToAllNetwork();
 

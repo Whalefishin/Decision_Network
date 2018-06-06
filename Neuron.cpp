@@ -25,9 +25,9 @@ double x_0, double t_0, double h){
     t_data.push_back(t);
 }
 
-Neuron::~Neuron(){
+// Neuron::~Neuron(){
 
-}
+// }
 
 
 void Neuron::updateRK4(double (Neuron::*f)(double)){
