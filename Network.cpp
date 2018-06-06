@@ -22,12 +22,12 @@ Network::~Network(){
     }
 }
 
-void Network::initialize(double diff){
+void Network::initializeFairIC(double IC, double diff){
     //Assume one winner, and diff is in [0,1]
     //Assume no biase in IC
     for (int i=0;i<num_neurons;i++){
         neuron_vector[i]->S = 1.0-diff;
-        neuron_vector[i]->x = 0.5;
+        neuron_vector[i]->x = IC;
     }
     int winner_num = rand() % num_neurons;
     neuron_vector[winner_num]->S = 1.0;
@@ -156,6 +156,22 @@ void Network::removeUndirectedConnection(int n1, int n2){
     removeUndirectedConnection(N1,N2);
 }
 
+bool Network::isConnected(Neuron* n1, Neuron* n2){
+    for (int i=0;i<n1->neighbors.size();i++){
+        if (n1->neighbors[i] == n2){
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Network::isConnected(int n1, int n2){
+    Neuron* N1 = neuron_vector[n1];
+    Neuron* N2 = neuron_vector[n2];
+    return isConnected(N1,N2);
+}
+
+
 vector<Neuron*> Network::getNeighbors(Neuron* n){
     return n->neighbors;
 }
@@ -165,6 +181,7 @@ void Network::constructRegularNetwork(int k){
     //follows the algorithm on constructing a ring lattice.
     //assumes k to be even
     k = k/2;
+
 
     for (int i=0;i<num_neurons;i++){
         Neuron* n = neuron_vector[i];
@@ -176,6 +193,50 @@ void Network::constructRegularNetwork(int k){
         }
     }
 }
+
+
+void Network::constructRandomNetwork(double p){
+    for (int i=0;i<num_neurons;i++){
+        for (int j=i+1;j<num_neurons;j++){
+            //r is a random float in [0,1]
+            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            if (r <= p){
+                insertUndirectedConnection(i,j);
+            }
+        }
+    }
+}
+
+void Network::constructSmallWorldNetwork(int k, double p){
+    constructRegularNetwork(k);
+    //rewire
+    for (int n=0;n<num_neurons;n++){
+        for (int i =1;i<=k/2;i++){ //assume k to be even
+            //r is a random float in [0,1]
+            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            if (r <= p){
+                int target = mod(n+i,num_neurons);
+                removeUndirectedConnection(n,target);
+                //j is the index for the neuron to rewire to
+                int j = rand() % num_neurons;
+                //make sure j is not n (the same neuron), and not connected 
+                while (j==n && isConnected(j,n)){
+                    j = rand() % num_neurons;
+                }
+                insertUndirectedConnection(n,j);
+            }
+        }
+    }
+}
+
+void Network::constructAllToAllNetwork(){
+    for (int i=0;i<neuron_vector.size();i++){
+        for (int j=i+1;j<num_neurons;j++){
+            insertUndirectedConnectionNoChecking(i,j); //fine here since we're progressing linearly
+        }
+    }
+}
+
 
 int** Network::outputAdjacencyMtx(){
     int** J = new int*[num_neurons];
@@ -202,60 +263,6 @@ int** Network::outputAdjacencyMtx(){
 }
 
 
-// void Network::constructRandomNetwork(int k){
-//     double thresholdProb = ((double)k)/num_neurons;
-//     for (int i=0;i<num_neurons;i++){
-//         Neuron* n = neuron_vector[i];
-//         for (int j=0;j<num_neurons;j++){
-//             //r is a random float in [0,1]
-//             float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-//             if (r <= thresholdProb){
-//                 insertUndirectedConnection(i,j);
-//             }
-//         }
-//     }
-// }
-
-void Network::constructRandomNetwork(double p){
-    for (int i=0;i<num_neurons;i++){
-        for (int j=i+1;j<num_neurons;j++){
-            //r is a random float in [0,1]
-            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-            if (r <= p){
-                insertUndirectedConnection(i,j);
-            }
-        }
-    }
-}
-
-void Network::constructSmallWorldNetwork(int k, double p){
-    constructRegularNetwork(k);
-    //rewire
-    for (int n=0;n<num_neurons;n++){
-        for (int i =1;i<=k/2;i++){ //assume k to be even
-            //r is a random float in [0,1]
-            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-            if (r <= p){
-                removeUndirectedConnection(n,n+i);
-                //j is the index for the neuron to rewire to
-                int j = rand() % num_neurons;
-                while (j==n){ //make sure j is not n, the same neuron
-                    j = rand() % num_neurons;
-                }
-                insertUndirectedConnection(n,j);
-            }
-        }
-    }
-}
-
-void Network::constructAllToAllNetwork(){
-    for (int i=0;i<neuron_vector.size();i++){
-        for (int j=i+1;j<num_neurons;j++){
-            insertUndirectedConnectionNoChecking(i,j); //fine here since we're progressing linearly
-        }
-    }
-}
-
 void Network::computeAccuracy(){
     double max_winner_acc =0;
     for (int i=0;i<winners.size();i++){
@@ -274,3 +281,20 @@ void Network::computeAccuracy(){
 
     Acc = max_winner_acc - max_loser_acc;
 }
+
+
+
+
+// void Network::constructRandomNetwork(int k){
+//     double thresholdProb = ((double)k)/num_neurons;
+//     for (int i=0;i<num_neurons;i++){
+//         Neuron* n = neuron_vector[i];
+//         for (int j=0;j<num_neurons;j++){
+//             //r is a random float in [0,1]
+//             float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+//             if (r <= thresholdProb){
+//                 insertUndirectedConnection(i,j);
+//             }
+//         }
+//     }
+// }

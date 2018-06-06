@@ -24,15 +24,17 @@ class Network{
     void removeUndirectedConnection(int n1, int n2);
     void insertUndirectedConnectionNoChecking(Neuron* n1, Neuron* n2); // use this at your own risk
     void insertUndirectedConnectionNoChecking(int n1, int n2);
+    bool isConnected(Neuron* n1, Neuron* n2);
+    bool isConnected(int n1, int n2);
     vector<Neuron*> getNeighbors(Neuron* n);
 
     void update(double (Neuron::*f)(double)); //update the whole network one step forward
     void updateIntegrateAll(double (Neuron::*f)(double)); //gain fcn incoporates evidence
     void computeAccuracy();
 
-    void initialize(double diff); //use this for schematic initialization. diff is the difference in S btw winner and others
+    void initializeFairIC(double IC, double diff); //use this for schematic initialization. diff is the difference in S btw winner and others
     void constructRegularNetwork(int k); //k is the mean degree, assumed to be even
-    void constructRandomNetwork(double p);
+    void constructRandomNetwork(double p); //p is the prob that any given possible edge exists
     void constructSmallWorldNetwork(int k, double p); //p is the rewiring prob.
     void constructAllToAllNetwork();
 

@@ -11,7 +11,7 @@ int main(){
     //fixed random seed for consistency
     srand(6);
 
-    int single_Network_neurons = 5;
+    int single_Network_neurons = 1000;
     Network* network = new Network(single_Network_neurons,5,1,0.01);
 
     Neuron* n1 = network->neuron_vector[0];
@@ -23,7 +23,8 @@ int main(){
     // n2->S = 0.3;
 
     //network->constructRandomNetwork(0.5);
-    network->constructAllToAllNetwork();
+    //network->constructAllToAllNetwork();
+    network->constructSmallWorldNetwork(single_Network_neurons/10,0.1);
     // for (int i =0;i<network->num_neurons;i++){
     //     network->insertUndirectedConnection(0,i);
     // }
@@ -59,7 +60,7 @@ int main(){
     vector<double> Acc_data;
 
     //scaling
-    int num_networks = 30;
+    int num_networks = 10;
     int update_times_scaling = 1000;
     for (int i=0;i<num_networks;i++){
         //initialize
@@ -91,8 +92,8 @@ int main(){
 
 
     //3D plots
-    int num_outer_loop = 10;
-    int num_inner_loop = 10;
+    int num_outer_loop = 50;
+    int num_inner_loop = 21;
     int update_times_3D = 10;
 
     vector<double> w_Vector_3D;
@@ -112,7 +113,7 @@ int main(){
             //double diff = (j-1)*0.1;
             Network network_3D(N,w/(N-1),1,0.01);
             network_3D.constructAllToAllNetwork();
-            network_3D.initialize(diff);
+            network_3D.initializeFairIC(1.0,diff);
             //network_3D.initialize(0.5);
             for (int k = 0;k<update_times_3D;k++){
                 network_3D.updateIntegrateAll(&Neuron::sigmActiv);
@@ -125,6 +126,54 @@ int main(){
             diff_Vector_3D.push_back(diff);
             Acc_Vector_3D.push_back(network_3D.Acc);
             RT_Vector_3D.push_back(network_3D.RT);
+        }
+    }
+
+
+    //3D with averaged fair IC
+    int num_outer_loop_AVG_Fair = 10;
+    int num_inner_loop_AVG_Fair = 21;
+    int update_times_3D_AVG_Fair = 10;
+    int num_IC = 11; //number of IC to avg.
+
+    vector<double> w_Vector_3D_AVG_Fair;
+    vector<double> N_Vector_3D_AVG_Fair;
+    vector<double> diff_Vector_3D_AVG_Fair;
+    vector<double> Acc_Vector_3D_AVG_Fair;
+    vector<double> RT_Vector_3D_AVG_Fair;
+
+
+    for (int i=1;i<=num_outer_loop_AVG_Fair;i++){
+        //double N = 10;
+        double N = i*10;
+        //double diff = (i-1)*0.1;
+        double diff = 0.5;
+        for (int j=1;j<=num_inner_loop_AVG_Fair;j++){
+            double Acc_sum =0; //IC avg.
+            double RT_sum = 0; //IC avg.
+            double w = (double)(j-1);
+            for (int l=0;l<num_IC;l++){
+                double IC = l*0.1;
+                //double w = 1.0;
+                //double diff = (j-1)*0.1;
+                Network network_3D(N,w/(N-1),1,0.01);
+                network_3D.constructAllToAllNetwork();
+                network_3D.initializeFairIC(IC,diff);
+                //network_3D.initialize(0.5);
+                for (int k = 0;k<update_times_3D;k++){
+                    network_3D.updateIntegrateAll(&Neuron::sigmActiv);
+                    if (k==update_times_3D-1){
+                        network_3D.computeAccuracy();
+                    }
+                }
+                Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                RT_sum += network_3D.RT;
+            }
+            N_Vector_3D_AVG_Fair.push_back(N);
+            w_Vector_3D_AVG_Fair.push_back(w);
+            diff_Vector_3D_AVG_Fair.push_back(diff);
+            Acc_Vector_3D_AVG_Fair.push_back(Acc_sum/num_IC);
+            RT_Vector_3D_AVG_Fair.push_back(RT_sum/num_IC);
         }
     }
 
@@ -146,6 +195,12 @@ int main(){
     ofstream Acc_Data_3D("Data/3D_Acc.txt");
     ofstream RT_Data_3D("Data/3D_RT.txt");
 
+    ofstream w_Data_3D_AVG_Fair("Data/3D_w.txt");
+    ofstream N_Data_3D_AVG_Fair("Data/3D_N.txt");
+    ofstream diff_Data_3D_AVG_Fair("Data/3D_diff.txt");
+    ofstream Acc_Data_3D_AVG_Fair("Data/3D_Acc.txt");
+    ofstream RT_Data_3D_AVG_Fair("Data/3D_RT.txt");
+
     for (int i=0;i<n1->t_data.size();i++){
         timeData << n1->t_data[i] << endl;
         x1Data << n1->x_data[i] << endl;
@@ -164,6 +219,14 @@ int main(){
         diff_Data_3D << diff_Vector_3D[i] << endl;
         Acc_Data_3D << Acc_Vector_3D[i] << endl;
         RT_Data_3D << RT_Vector_3D[i] << endl;
+    }
+
+    for (int i=0;i<N_Vector_3D.size();i++){
+        w_Data_3D_AVG_Fair << w_Vector_3D_AVG_Fair[i] << endl;
+        N_Data_3D_AVG_Fair << N_Vector_3D_AVG_Fair[i] << endl;
+        diff_Data_3D_AVG_Fair << diff_Vector_3D_AVG_Fair[i] << endl;
+        Acc_Data_3D_AVG_Fair << Acc_Vector_3D_AVG_Fair[i] << endl;
+        RT_Data_3D_AVG_Fair << RT_Vector_3D_AVG_Fair[i] << endl;
     }
 
     //single network
