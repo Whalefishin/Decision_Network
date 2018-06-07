@@ -6,7 +6,7 @@ OFILES = Network.o Neuron.o
 # The header files for the program
 HFILES = Network.h Neuron.h Statistics.h
 # UnitTest++ keeps its object files in this directory.
-# UNITTEST_LIB = -lUnitTe st++
+# UNITTEST_LIB = -lUnitTest++
 
 all: main
 

@@ -34,6 +34,21 @@ void Network::initializeFairIC(double IC, double diff){
     winners.push_back(neuron_vector[winner_num]);
 }
 
+void Network::initializeRandomIC(double diff){
+    //Assume one winner, and diff is in [0,1]
+    //Assume no biase in IC
+    for (int i=0;i<num_neurons;i++){
+        neuron_vector[i]->S = 1.0-diff;
+        neuron_vector[i]->x = rand();
+    }
+    int winner_num = rand() % num_neurons;
+    neuron_vector[winner_num]->S = 1.0;
+    winners.push_back(neuron_vector[winner_num]);
+}
+
+
+
+
 
 void Network::update(double (Neuron::*f)(double)){
     time += time_step;
@@ -219,7 +234,7 @@ void Network::constructSmallWorldNetwork(int k, double p){
                 removeUndirectedConnection(n,target);
                 //j is the index for the neuron to rewire to
                 int j = rand() % num_neurons;
-                //make sure j is not n (the same neuron), and not connected 
+                //make sure j is not n (the same neuron), and not connected
                 while (j==n && isConnected(j,n)){
                     j = rand() % num_neurons;
                 }
@@ -257,7 +272,7 @@ int** Network::outputAdjacencyMtx(){
             J[i][neighbor->number] = 1;
         }
     }
-    
+
     return J;
 
 }
@@ -280,6 +295,36 @@ void Network::computeAccuracy(){
     }
 
     Acc = max_winner_acc - max_loser_acc;
+}
+
+void Network::computeAccuracy(int k){
+    double max_winner_acc =0;
+    for (int i=0;i<winners.size();i++){
+        if (winners[i]->x > max_winner_acc){
+            max_winner_acc = winners[i]->x;
+        }
+    }
+
+    if (k == 1){
+        double max_loser_acc = 0;
+        for (int i=0;i<neuron_vector.size();i++){
+            Neuron* loser = neuron_vector[i];
+            if (!contains(winners,loser) && loser->x > max_loser_acc){
+                max_loser_acc = loser->x;
+            }
+        }
+        Acc = max_winner_acc - max_loser_acc;
+    }
+    else if (k == 2){
+        double mean_loser_acc = 0;
+        for (int i=0;i<neuron_vector.size();i++){
+            Neuron* loser = neuron_vector[i];
+            mean_loser_acc = mean_loser_acc + loser->x;
+        }
+        mean_loser_acc = mean_loser_acc/(neuron_vector.size()-1);
+        Acc = max_winner_acc - mean_loser_acc;
+    }
+
 }
 
 
