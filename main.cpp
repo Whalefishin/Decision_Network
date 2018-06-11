@@ -61,7 +61,7 @@ int main(){
 
     //scaling
     int num_networks = 10;
-    int update_times_scaling = 1000;
+    int update_times_scaling = 10;
     for (int i=0;i<num_networks;i++){
         //initialize
         double w = (double)i;
@@ -92,7 +92,7 @@ int main(){
 
 
     //3D plots
-    int num_outer_loop = 3;
+    int num_outer_loop = 10;
     int num_inner_loop = 21;
     int update_times_3D = 10;
 
@@ -107,12 +107,12 @@ int main(){
         //double N = 10;
         double N = i*10;
         //double diff = (i-1)*0.1;
-        double diff = 0.8;
+        double diff = 0.5;
         for (int j=1;j<=num_inner_loop;j++){
             //double w = 1.0;
             double w = (double)(j-1);
             //double diff = (j-1)*0.1;
-            Network network_3D(N,w/(N-1),1,0.01);
+            Network network_3D(N,w/(N-1),1,0.1);
             network_3D.constructAllToAllNetwork();
             network_3D.initializeFairIC(1.0,diff);
             //network_3D.initialize(0.5);
