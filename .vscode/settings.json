@@ -14,5 +14,6 @@
         "cstdlib": "cpp",
         "__bit_reference": "cpp",
         "initializer_list": "cpp"
-    }
+    },
+    "python.linting.pylintEnabled": false
 }

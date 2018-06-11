@@ -94,7 +94,7 @@ int main(){
     //3D plots
     int num_outer_loop = 3;
     int num_inner_loop = 21;
-    int update_times_3D = 10000;
+    int update_times_3D = 10;
 
     vector<double> w_Vector_3D;
     vector<double> N_Vector_3D;
@@ -132,10 +132,10 @@ int main(){
 
 
     //3D with averaged fair IC
-    int num_outer_loop_AVG_Fair = 10;
-    int num_inner_loop_AVG_Fair = 21;
-    int update_times_3D_AVG_Fair = 5000;
-    int num_IC = 10; //number of IC to avg.
+    int num_outer_loop_AVG_Fair = 20;
+    int num_inner_loop_AVG_Fair = 11;
+    int update_times_3D_AVG_Fair = 5;
+    int num_IC_AVG_Fair = 10; //number of IC to avg.
 
     vector<double> w_Vector_3D_AVG_Fair;
     vector<double> N_Vector_3D_AVG_Fair;
@@ -153,8 +153,9 @@ int main(){
             double Acc_sum =0; //IC avg.
             double RT_sum = 0; //IC avg.
             double w = (double)(j-1);
-            for (int l=1;l<=num_IC;l++){
-                double IC = l*0.09;
+            for (int l=1;l<=num_IC_AVG_Fair;l++){
+                double IC = 0.1 + 0.8/num_IC_AVG_Fair * l;
+                //double IC = l*0.09;
                 //double w = 1.0;
                 //double diff = (j-1)*0.1;
                 Network network_3D(N,w/(N-1),1,0.01);
@@ -173,10 +174,100 @@ int main(){
             N_Vector_3D_AVG_Fair.push_back(N);
             w_Vector_3D_AVG_Fair.push_back(w);
             diff_Vector_3D_AVG_Fair.push_back(diff);
-            Acc_Vector_3D_AVG_Fair.push_back(Acc_sum/num_IC);
-            RT_Vector_3D_AVG_Fair.push_back(RT_sum/num_IC);
+            Acc_Vector_3D_AVG_Fair.push_back(Acc_sum/num_IC_AVG_Fair);
+            RT_Vector_3D_AVG_Fair.push_back(RT_sum/num_IC_AVG_Fair);
         }
     }
+
+
+
+    //Behold, the ultimate version for W vs. N
+    int gain_type = 2;
+    int sep_gain = 2;
+    int normalization = 2;
+    int biased_IC = 2;
+
+    int num_outer_loop_ult = 20;
+    int num_inner_loop_ult = 11;
+    int update_times_ult = 5;
+    double diff_ult = 0.5;
+
+    int num_Fair_IC_ult = 10;
+    int num_Unfair_IC_ult = 1;
+    vector<int> IC_vector;
+    IC_vector.push_back(num_Fair_IC_ult);
+    IC_vector.push_back(num_Unfair_IC_ult);
+
+    vector<vector<double> > W_N_N_Vector;
+    vector<vector<double> > W_N_W_Vector;
+    vector<vector<double> > W_N_diff_Vector;
+    vector<vector<double> > W_N_Acc_Vector;
+    vector<vector<double> > W_N_RT_Vector;
+    
+    for (int i=0;i<gain_type*sep_gain*normalization*biased_IC;i++){
+        vector<double> toPush;
+        W_N_N_Vector.push_back(toPush);
+        W_N_W_Vector.push_back(toPush);
+        W_N_diff_Vector.push_back(toPush);
+        W_N_Acc_Vector.push_back(toPush);
+        W_N_RT_Vector.push_back(toPush);
+    }
+
+    for (int g=0;g<gain_type;g++){
+        for (int s=0;s<sep_gain;s++){
+            for (int n=0;n<normalization;n++){
+                for (int b=0;b<biased_IC;b++){
+                    int num_IC = IC_vector[b];
+                    for (int i=1;i<=num_outer_loop_ult;i++){
+                        //double N = 10;
+                        double N = i*10;
+                        for (int j=1;j<=num_inner_loop_ult;j++){
+                            //double w = 1.0;
+                            double Acc_sum =0; //IC avg.
+                            double RT_sum = 0; //IC avg.
+                            double W = (double)(j-1);
+                            for (int l=1;l<=num_IC;l++){
+                                double IC = 0.1 + 0.8/num_IC * l;
+                                Network* network_3D;
+                                if (n==0){ //normalization on
+                                    //Network network_3D(N,W/(N-1),1,0.01);
+                                    network_3D = new Network(N,W/(N-1),1,0.01);
+                                }
+                                else{ //no normalization
+                                    //Network network_3D(N,W,1,0.01);
+                                    network_3D = new Network(N,W,1,0.01);
+                                }
+                                network_3D->constructAllToAllNetwork();
+                                network_3D->initializeWithChoice(b,IC,diff_ult);
+                                //network_3D.initialize(0.5);
+                                for (int k = 0;k<update_times_ult;k++){
+                                    network_3D->updateWithChoice(s,g);
+                                    if (k==update_times_ult-1){
+                                        network_3D->computeAccuracy();
+                                    }
+                                }
+                                Acc_sum += max(0,network_3D->Acc); //if Acc is neg, set to 0.
+                                RT_sum += network_3D->RT;
+
+                                delete network_3D;                                
+                            }
+                            //data collection
+                            int index = b*1 + n*2 + s*4 + g*8;
+                            W_N_N_Vector[index].push_back(N);
+                            W_N_W_Vector[index].push_back(W);
+                            W_N_diff_Vector[index].push_back(diff_ult);
+                            W_N_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                            W_N_RT_Vector[index].push_back(RT_sum/num_IC);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
 
 
     //Outputting
@@ -201,6 +292,12 @@ int main(){
     ofstream diff_Data_3D_AVG_Fair("Data/3D_diff_AVG_Fair.txt");
     ofstream Acc_Data_3D_AVG_Fair("Data/3D_Acc_AVG_Fair.txt");
     ofstream RT_Data_3D_AVG_Fair("Data/3D_RT_AVG_Fair.txt");
+
+    // ofstream W_N_W_Data_ult("Data/W_N_W_ult.txt");
+    // ofstream W_N_N_Data_ult("Data/W_N_N_ult.txt");
+    // ofstream W_N_diff_Data_ult("Data/W_N_diff_ult.txt");
+    // ofstream W_N_Acc_Data_ult("Data/W_N_Acc_ult.txt");
+    // ofstream W_N_RT_Data_ult("Data/W_N_RT_ult.txt");
 
     for (int i=0;i<n1->t_data.size();i++){
         timeData << n1->t_data[i] << endl;
@@ -228,6 +325,63 @@ int main(){
         diff_Data_3D_AVG_Fair << diff_Vector_3D_AVG_Fair[i] << endl;
         Acc_Data_3D_AVG_Fair << Acc_Vector_3D_AVG_Fair[i] << endl;
         RT_Data_3D_AVG_Fair << RT_Vector_3D_AVG_Fair[i] << endl;
+    }
+
+    // for (int i=0;i<W_N_W_Vector.size();i++){
+    //     for (int j=0;j<W_N_W_Vector[i].size();j++){
+    //         W_N_W_Data_ult << W_N_W_Vector[i][j] << endl;
+    //         W_N_N_Data_ult << W_N_N_Vector[i][j] << endl;
+    //         W_N_diff_Data_ult << W_N_diff_Vector[i][j] << endl;
+    //         W_N_Acc_Data_ult << W_N_Acc_Vector[i][j] << endl;
+    //         W_N_RT_Data_ult << W_N_RT_Vector[i][j] << endl;
+    //     }
+    // }
+
+    vector<string> gain_names;
+    vector<string> sep_names;
+    vector<string> norm_names;
+    vector<string> biased_names;
+    gain_names.push_back("_Sigm");
+    gain_names.push_back("_Binary");
+    sep_names.push_back("_IntAll");
+    sep_names.push_back("_Sep");
+    norm_names.push_back("_YesNorm");
+    norm_names.push_back("_NoNorm");
+    biased_names.push_back("_Fair");
+    biased_names.push_back("_Unfair");
+    string W_N_base_name = "W_N";
+    
+
+    for (int g=0;g<gain_type;g++){
+        for (int s=0;s<sep_gain;s++){
+            for (int n=0;n<normalization;n++){
+                for (int b=0;b<biased_IC;b++){
+                    string filename1 = "Data/" + W_N_base_name +"_N"+ gain_names[g] + sep_names[s]
+                    + norm_names[n] + biased_names[b]+ ".txt";
+                    string filename2 = "Data/" +W_N_base_name +"_W"+ gain_names[g] + sep_names[s]
+                    + norm_names[n] + biased_names[b]+ ".txt";
+                    string filename3 = "Data/" +W_N_base_name +"_diff"+ gain_names[g] + sep_names[s]
+                    + norm_names[n] + biased_names[b]+ ".txt";
+                    string filename4 = "Data/" +W_N_base_name +"_Acc"+ gain_names[g] + sep_names[s]
+                    + norm_names[n] + biased_names[b]+ ".txt";
+                    string filename5 = "Data/" +W_N_base_name +"_RT"+ gain_names[g] + sep_names[s]
+                    + norm_names[n] + biased_names[b] + ".txt";
+                    ofstream ToWrite1(filename1);
+                    ofstream ToWrite2(filename2);
+                    ofstream ToWrite3(filename3);
+                    ofstream ToWrite4(filename4);
+                    ofstream ToWrite5(filename5);
+                    int index = b*1 + n*2 + s*4 + g*8;
+                    for (int i=0;i<W_N_N_Vector[index].size();i++){
+                        ToWrite1 << W_N_N_Vector[index][i] << endl;
+                        ToWrite2 << W_N_W_Vector[index][i] << endl;
+                        ToWrite3 << W_N_diff_Vector[index][i] << endl;
+                        ToWrite4 << W_N_Acc_Vector[index][i] << endl;
+                        ToWrite5 << W_N_RT_Vector[index][i] << endl;
+                    }
+                }
+            }
+        }
     }
 
     //single network

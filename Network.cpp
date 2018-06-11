@@ -22,6 +22,15 @@ Network::~Network(){
     }
 }
 
+void Network::initializeWithChoice(int c, double IC, double diff){
+    if (c==0){ //fair
+        initializeFairIC(IC,diff);
+    }
+    else{ //random
+        initializeRandomIC(diff);
+    }
+}
+
 void Network::initializeFairIC(double IC, double diff){
     //Assume one winner, and diff is in [0,1]
     //Assume no biase in IC
@@ -115,6 +124,21 @@ void Network::updateIntegrateAll(double (Neuron::*f)(double)){
         Neuron* toUpdate = neuron_vector[i];
         toUpdate->t_prev = toUpdate->t;
         toUpdate->x_prev = toUpdate->x;
+    }
+}
+
+void Network::updateWithChoice(int c, int g){
+    if (c==0 && g ==0){
+        updateIntegrateAll(&Neuron::sigmActiv);
+    }
+    else if (c==0 && g==1){
+        updateIntegrateAll(&Neuron::binaryActiv);
+    }
+    else if (c==1 && g==0){
+        update(&Neuron::sigmActiv);
+    }
+    else{
+        update(&Neuron::binaryActiv);
     }
 }
 

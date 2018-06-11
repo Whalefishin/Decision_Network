@@ -30,11 +30,13 @@ class Network{
 
     void update(double (Neuron::*f)(double)); //update the whole network one step forward
     void updateIntegrateAll(double (Neuron::*f)(double)); //gain fcn incoporates evidence
+    void updateWithChoice(int c, int g);
     void computeAccuracy();
     void computeAccuracy(int k);
 
     void initializeFairIC(double IC, double diff);
     void initializeRandomIC(double diff); //use this for schematic initialization. diff is the difference in S btw winner and others
+    void initializeWithChoice(int c, double IC, double diff);
     void constructRegularNetwork(int k); //k is the mean degree, assumed to be even
     void constructRandomNetwork(double p); //p is the prob that any given possible edge exists
     void constructSmallWorldNetwork(int k, double p); //p is the rewiring prob.
