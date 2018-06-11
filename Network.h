@@ -16,6 +16,7 @@ using namespace std;
 class Network{
     public:
     Network(int num_neurons, double w, double lambda, double time_step);
+    Network(int num_neurons, double w, double lambda, double time_step, int norm);
     ~Network();
 
     void insertUndirectedConnection(Neuron* n1, Neuron* n2);
