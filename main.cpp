@@ -191,14 +191,14 @@ int main(){
 
     int num_outer_loop_ult = 20;
     int num_inner_loop_ult = 11;
-    int update_times_ult = 5;
+    int update_times_ult = 1;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
     diff_vector.push_back(0.2);
     diff_vector.push_back(0.5);
     diff_vector.push_back(0.8);
 
-    int num_Fair_IC_ult = 10;
+    int num_Fair_IC_ult = 1;
     int num_Unfair_IC_ult = 1;
     vector<int> IC_vector;
     IC_vector.push_back(num_Fair_IC_ult);
@@ -258,6 +258,91 @@ int main(){
                                 W_N_diff_Vector[index].push_back(diff_ult);
                                 W_N_Acc_Vector[index].push_back(Acc_sum/num_IC);
                                 W_N_RT_Vector[index].push_back(RT_sum/num_IC);
+                            }
+                        }
+                        //update index out of the simulation loop
+                        index++;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    //Behold again, the ultimate version for W vs. Diff
+    int num_neuron_count = 3;
+
+    int num_outer_loop_ult_2 = 10;
+    int num_inner_loop_ult_2 = 11;
+    int update_times_ult_2 = 5;
+    //double diff_ult = 0.5;
+    vector<double> num_neuron_vector;
+    num_neuron_vector.push_back(10);
+    num_neuron_vector.push_back(50);
+    num_neuron_vector.push_back(100);
+
+    int num_Fair_IC_ult_2 = 10;
+    int num_Unfair_IC_ult_2 = 1;
+    vector<int> IC_vector_2;
+    IC_vector_2.push_back(num_Fair_IC_ult_2);
+    IC_vector_2.push_back(num_Unfair_IC_ult_2);
+
+    vector<vector<double> > W_Diff_N_Vector;
+    vector<vector<double> > W_Diff_W_Vector;
+    vector<vector<double> > W_Diff_diff_Vector;
+    vector<vector<double> > W_Diff_Acc_Vector;
+    vector<vector<double> > W_Diff_RT_Vector;
+    
+    for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC;i++){
+        vector<double> toPush;
+        W_Diff_N_Vector.push_back(toPush);
+        W_Diff_W_Vector.push_back(toPush);
+        W_Diff_diff_Vector.push_back(toPush);
+        W_Diff_Acc_Vector.push_back(toPush);
+        W_Diff_RT_Vector.push_back(toPush);
+    }
+
+    index = 0;
+    for (int d=0;d<num_neuron_count;d++){
+        int N = num_neuron_vector[d];
+        for (int g=0;g<gain_type;g++){
+            for (int s=0;s<sep_gain;s++){
+                for (int n=0;n<normalization;n++){
+                    for (int b=0;b<biased_IC;b++){
+                        int num_IC = IC_vector_2[b];
+                        for (int i=1;i<=num_outer_loop_ult_2;i++){
+                            //double N = 10;
+                            //double N = i*10;
+                            double diff_ult = 0.1 + 0.8/num_outer_loop_ult_2 * i;
+                            for (int j=1;j<=num_inner_loop_ult_2;j++){
+                                //double w = 1.0;
+                                double Acc_sum =0; //IC avg.
+                                double RT_sum = 0; //IC avg.
+                                double W = (double)(j-1);
+                                for (int l=1;l<=num_IC;l++){
+                                    double IC = 0.1 + 0.8/num_IC * l;
+                                    //cout << "here" <<endl;
+                                    Network network_3D(N,W,1,0.01,b);
+                                    network_3D.constructAllToAllNetwork();
+                                    network_3D.initializeWithChoice(b,IC,diff_ult);
+                                    //network_3D.initialize(0.5);
+                                    for (int k = 0;k<update_times_ult_2;k++){
+                                        network_3D.updateWithChoice(s,g);
+                                        if (k==update_times_ult_2-1){
+                                            network_3D.computeAccuracy();
+                                        }
+                                    }
+                                    Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                    RT_sum += network_3D.RT;                               
+                                }
+                                //data collection
+                                //int index = b*1 + n*2 + s*4 + g*8;
+                                W_Diff_N_Vector[index].push_back(N);
+                                W_Diff_W_Vector[index].push_back(W);
+                                W_Diff_diff_Vector[index].push_back(diff_ult);
+                                W_Diff_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                                W_Diff_RT_Vector[index].push_back(RT_sum/num_IC);
                             }
                         }
                         //update index out of the simulation loop
@@ -336,6 +421,7 @@ int main(){
     //     }
     // }
 
+    //W vs N data
     vector<string> diff_names;
     vector<string> gain_names;
     vector<string> sep_names;
@@ -365,7 +451,7 @@ int main(){
                         + norm_names[n] + biased_names[b]+ diff_names[d] + ".txt";
                         string filename2 = "Data/" +W_N_base_name +"_W"+ gain_names[g] + sep_names[s]
                         + norm_names[n] + biased_names[b]+diff_names[d] +  ".txt";
-                        string filename3 = "Data/" +W_N_base_name +"_diff"+ gain_names[g] + sep_names[s]
+                        string filename3 = "Data/" +W_N_base_name +"_Diff"+ gain_names[g] + sep_names[s]
                         + norm_names[n] + biased_names[b]+diff_names[d] +  ".txt";
                         string filename4 = "Data/" +W_N_base_name +"_Acc"+ gain_names[g] + sep_names[s]
                         + norm_names[n] + biased_names[b]+diff_names[d] +  ".txt";
@@ -383,6 +469,64 @@ int main(){
                             ToWrite3 << W_N_diff_Vector[index][i] << endl;
                             ToWrite4 << W_N_Acc_Vector[index][i] << endl;
                             ToWrite5 << W_N_RT_Vector[index][i] << endl;
+                        }
+                        index++;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    //W vs. Diff data
+    // vector<string> gain_names_2;
+    // vector<string> sep_names_2;
+    // vector<string> norm_names_2;
+    // vector<string> biased_names_2;
+    vector<string> N_names;
+    N_names.push_back("_N=10");
+    N_names.push_back("_N=50");
+    N_names.push_back("_N=100");
+    // gain_names_2.push_back("_Sigm");
+    // gain_names_2.push_back("_Binary");
+    // sep_names_2.push_back("_IntAll");
+    // sep_names_2.push_back("_Sep");
+    // norm_names_2.push_back("_YesNorm");
+    // norm_names_2.push_back("_NoNorm");
+    // biased_names_2.push_back("_Fair");
+    // biased_names_2.push_back("_Unfair");
+    string base_name = "W_Diff";
+
+    index=0;
+    
+    for (int d=0;d<num_neuron_count;d++){
+        for (int g=0;g<gain_type;g++){
+            for (int s=0;s<sep_gain;s++){
+                for (int n=0;n<normalization;n++){
+                    for (int b=0;b<biased_IC;b++){
+                        string filename1 = "Data/" + base_name +"_N"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b]+ N_names[d] + ".txt";
+                        string filename2 = "Data/" +base_name +"_W"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b]+N_names[d] +  ".txt";
+                        string filename3 = "Data/" +base_name +"_Diff"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b]+N_names[d] +  ".txt";
+                        string filename4 = "Data/" +base_name +"_Acc"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b]+N_names[d] +  ".txt";
+                        string filename5 = "Data/" +base_name +"_RT"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + N_names[d] + ".txt";
+                        ofstream ToWrite1(filename1);
+                        ofstream ToWrite2(filename2);
+                        ofstream ToWrite3(filename3);
+                        ofstream ToWrite4(filename4);
+                        ofstream ToWrite5(filename5);
+                        //int index = b*1 + n*2 + s*4 + g*8;
+                        for (int i=0;i<W_Diff_N_Vector[index].size();i++){
+                            ToWrite1 << W_Diff_N_Vector[index][i] << endl;
+                            ToWrite2 << W_Diff_W_Vector[index][i] << endl;
+                            ToWrite3 << W_Diff_diff_Vector[index][i] << endl;
+                            ToWrite4 << W_Diff_Acc_Vector[index][i] << endl;
+                            ToWrite5 << W_Diff_RT_Vector[index][i] << endl;
                         }
                         index++;
                     }
