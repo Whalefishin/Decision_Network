@@ -80,7 +80,7 @@ double Neuron::computeRHS(double t, double x,double (Neuron::*f)(double)){
         integratedSum += (this->*f)(n->x_prev);
     }
 
-    ret = S - lambda * x - w * integratedSum;
+    ret = rectLinearActiv(S - w * integratedSum) - lambda * x;
 
     return ret;    
 }

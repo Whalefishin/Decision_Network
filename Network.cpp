@@ -1,3 +1,4 @@
+
 #include "Network.h"
 
 using namespace std;
@@ -325,14 +326,17 @@ int** Network::outputAdjacencyMtx(){
 
 
 void Network::computeAccuracy(){
-    double max_winner_acc =0;
+
+    double inf = numeric_limits<double>::infinity();
+
+    double max_winner_acc =-1*inf;
     for (int i=0;i<winners.size();i++){
         if (winners[i]->x > max_winner_acc){
             max_winner_acc = winners[i]->x;
         }
     }
 
-    double max_loser_acc = 0;
+    double max_loser_acc = -1*inf;
     for (int i=0;i<neuron_vector.size();i++){
         Neuron* loser = neuron_vector[i];
         if (!contains(winners,loser) && loser->x > max_loser_acc){
@@ -344,7 +348,10 @@ void Network::computeAccuracy(){
 }
 
 void Network::computeAccuracy(int k){
-    double max_winner_acc =0;
+
+    double inf = numeric_limits<double>::infinity();
+
+    double max_winner_acc = -1*inf;
     for (int i=0;i<winners.size();i++){
         if (winners[i]->x > max_winner_acc){
             max_winner_acc = winners[i]->x;
@@ -352,7 +359,7 @@ void Network::computeAccuracy(int k){
     }
 
     if (k == 1){
-        double max_loser_acc = 0;
+        double max_loser_acc = -1 * inf;
         for (int i=0;i<neuron_vector.size();i++){
             Neuron* loser = neuron_vector[i];
             if (!contains(winners,loser) && loser->x > max_loser_acc){
@@ -362,7 +369,7 @@ void Network::computeAccuracy(int k){
         Acc = max_winner_acc - max_loser_acc;
     }
     else if (k == 2){
-        double mean_loser_acc = 0;
+        double mean_loser_acc = -1*inf;
         for (int i=0;i<neuron_vector.size();i++){
             Neuron* loser = neuron_vector[i];
             mean_loser_acc = mean_loser_acc + loser->x;

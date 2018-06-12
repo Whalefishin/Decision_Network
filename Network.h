@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <vector>
 #include <utility>
+#include <limits>
 
 #include "Neuron.h"
 #include "Statistics.h"

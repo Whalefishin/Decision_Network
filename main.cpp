@@ -5,6 +5,7 @@
 #include <thread>
 #include <mutex>
 
+
 #include "Network.h"
 
 using namespace std;
@@ -80,8 +81,8 @@ int main(){
     //fixed random seed for consistency
     srand(6);
 
-    int single_Network_neurons = 1000;
-    Network* network = new Network(single_Network_neurons,5,1,0.01);
+    int single_Network_neurons = 20;
+    Network* network = new Network(single_Network_neurons,5,1,0.1,1);
 
     Neuron* n1 = network->neuron_vector[0];
     Neuron* n2 = network->neuron_vector[1];
@@ -92,8 +93,10 @@ int main(){
     // n2->S = 0.3;
 
     //network->constructRandomNetwork(0.5);
-    //network->constructAllToAllNetwork();
-    network->constructSmallWorldNetwork(single_Network_neurons/10,0.1);
+    network->constructAllToAllNetwork();
+    //network->constructSmallWorldNetwork(single_Network_neurons/10,0.1);
+    //network->initializeWithChoice(0,0.5,0.5);
+
     // for (int i =0;i<network->num_neurons;i++){
     //     network->insertUndirectedConnection(0,i);
     // }
@@ -101,17 +104,16 @@ int main(){
     for (int i=0;i<network->num_neurons;i++){
         Neuron* n = network->neuron_vector[i];
         n->x = 0.5;
-        n->S = 0.3;
+        n->S = 0.5;
     }
 
     //winner parameters
-    n1->S = 0.5;
-
+    n1->S = 1.0;
     network->winners.push_back(n1);
 
-    int update_times = 50;
+    int update_times = 500;
     for (int t=0;t<update_times;t++){
-        network->updateIntegrateAll(&Neuron::sigmActiv);
+        network->update(&Neuron::binaryActiv);
         if (t == update_times-1){ //last loop, collect accuracy
             network->computeAccuracy();
         }
@@ -163,7 +165,7 @@ int main(){
     //3D plots
     int num_outer_loop = 30;
     int num_inner_loop = 11;
-    int update_times_3D = 500;
+    int update_times_3D = 5;
 
     vector<double> w_Vector_3D;
     vector<double> N_Vector_3D;
@@ -203,7 +205,7 @@ int main(){
     //3D with averaged fair IC
     int num_outer_loop_AVG_Fair = 20;
     int num_inner_loop_AVG_Fair = 11;
-    int update_times_3D_AVG_Fair = 5;
+    int update_times_3D_AVG_Fair = 1;
     int num_IC_AVG_Fair = 10; //number of IC to avg.
 
     vector<double> w_Vector_3D_AVG_Fair;
@@ -260,7 +262,7 @@ int main(){
 
     int num_outer_loop_ult = 20;
     int num_inner_loop_ult = 11;
-    int update_times_ult = 5;
+    int update_times_ult = 1;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
     diff_vector.push_back(0.2);
