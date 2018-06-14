@@ -71,7 +71,7 @@ void Network::initializeRandomIC(double diff){
     //Assume no biase in IC
     for (int i=0;i<num_neurons;i++){
         neuron_vector[i]->S = 1.0-diff;
-        neuron_vector[i]->x = rand() % 1;
+        neuron_vector[i]->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
     }
     int winner_num = rand() % num_neurons;
     neuron_vector[winner_num]->S = 1.0;

@@ -81,12 +81,14 @@ int main(){
     //fixed random seed for consistency
     srand(6);
 
-    int single_Network_neurons = 20;
-    Network* network = new Network(single_Network_neurons,5,1,0.1,1);
+    int single_Network_neurons = 50;
+    Network* network = new Network(single_Network_neurons,5,1,0.01,1);
 
     Neuron* n1 = network->neuron_vector[0];
     Neuron* n2 = network->neuron_vector[1];
     Neuron* n3 = network->neuron_vector[2];
+    Neuron* n4 = network->neuron_vector[3];
+    Neuron* n5 = network->neuron_vector[4];
     // n1->x = 0.1;
     // n2->x = 0.1;
     // n1->S = 0.35; //so n1 should be the winner.
@@ -103,21 +105,41 @@ int main(){
 
     for (int i=0;i<network->num_neurons;i++){
         Neuron* n = network->neuron_vector[i];
-        n->x = 0.5;
-        n->S = 0.5;
+        //n->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        //cout << n->x << endl;
+        n->x = 0;
+        n->x_prev = 0;
+        n->S = 0.2;
     }
 
     //winner parameters
     n1->S = 1.0;
     network->winners.push_back(n1);
 
-    int update_times = 500;
+    int update_times = 5000;
     for (int t=0;t<update_times;t++){
-        network->update(&Neuron::binaryActiv);
+        network->update(&Neuron::sigmActiv);
         if (t == update_times-1){ //last loop, collect accuracy
             network->computeAccuracy();
         }
     }
+
+    double xData = -1.0;
+    int index_w = 0;
+
+    for (int i=0;i<single_Network_neurons;i++){
+        Neuron* n = network->neuron_vector[i];
+        if (n->x > xData){
+            xData = n->x;
+            index_w = i;
+        }
+    }
+
+    cout << "winner index: " + to_string(index_w) << endl;
+
+    Neuron* n_winner = network->neuron_vector[index_w];
+
+
 
     int** J = network->outputAdjacencyMtx();
 
@@ -163,9 +185,9 @@ int main(){
 
 
     //3D plots
-    int num_outer_loop = 30;
+    int num_outer_loop = 10;
     int num_inner_loop = 11;
-    int update_times_3D = 5;
+    int update_times_3D = 1;
 
     vector<double> w_Vector_3D;
     vector<double> N_Vector_3D;
@@ -176,9 +198,9 @@ int main(){
     for (int i=1;i<=num_outer_loop;i++){
       cout << "big loop: " + to_string(i) << endl;
         //double N = 10;
-        double N = i*1+1;
+        double N = i*10;
         //double diff = (i-1)*0.1;
-        double diff = 0.5;
+        double diff = 0.2;
         for (int j=1;j<=num_inner_loop;j++){
             //double w = 1.0;
             double w = (double)(j-1);
@@ -203,9 +225,9 @@ int main(){
 
 
     //3D with averaged fair IC
-    int num_outer_loop_AVG_Fair = 20;
+    int num_outer_loop_AVG_Fair = 10;
     int num_inner_loop_AVG_Fair = 11;
-    int update_times_3D_AVG_Fair = 1;
+    int update_times_3D_AVG_Fair = 5;
     int num_IC_AVG_Fair = 10; //number of IC to avg.
 
     vector<double> w_Vector_3D_AVG_Fair;
@@ -219,7 +241,7 @@ int main(){
         //double N = 10;
         double N = i*10;
         //double diff = (i-1)*0.1;
-        double diff = 0.8;
+        double diff = 0.2;
         for (int j=1;j<=num_inner_loop_AVG_Fair;j++){
             double Acc_sum =0; //IC avg.
             double RT_sum = 0; //IC avg.
@@ -234,7 +256,7 @@ int main(){
                 network_3D.initializeFairIC(IC,diff);
                 //network_3D.initialize(0.5);
                 for (int k = 0;k<update_times_3D_AVG_Fair;k++){
-                    network_3D.updateIntegrateAll(&Neuron::sigmActiv);
+                    network_3D.update(&Neuron::sigmActiv);
                     if (k==update_times_3D_AVG_Fair-1){
                         network_3D.computeAccuracy();
                     }
@@ -260,8 +282,8 @@ int main(){
     int biased_IC = 2;
     int diff_count = 3;
 
-    int num_outer_loop_ult = 20;
-    int num_inner_loop_ult = 11;
+    int num_outer_loop_ult = 1;
+    int num_inner_loop_ult = 1;
     int update_times_ult = 1;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
@@ -290,7 +312,7 @@ int main(){
         W_N_RT_Vector.push_back(toPush);
     }
 
-    /*
+    
     int index = 0;
     for (int d=0;d<diff_count;d++){
         double diff_ult = diff_vector[d];
@@ -339,36 +361,36 @@ int main(){
             }
         }
     }
-    */
+    
 
    
 
    //Parallel version
-    int index = 0;
-    vector<thread> threads;
+    // int index = 0;
+    // vector<thread> threads;
 
-    Data computing_data;
+    // Data computing_data;
 
-    for (int i=1;i<=num_outer_loop_ult;i++){
-        double N = i*10;
-        computing_data.N = N;
-        computing_data.update_times = update_times_ult;
-        computing_data.num_inner_loop_ult = num_inner_loop_ult;
-        computing_data.diff_count = diff_count;
-        computing_data.gain_type = gain_type;
-        computing_data.sep_gain = sep_gain;
-        computing_data.normalization = normalization;
-        computing_data.biased_IC = biased_IC;
-        computing_data.diff_vector = diff_vector;
-        computing_data.IC_vector = IC_vector;
+    // for (int i=1;i<=num_outer_loop_ult;i++){
+    //     double N = i*10;
+    //     computing_data.N = N;
+    //     computing_data.update_times = update_times_ult;
+    //     computing_data.num_inner_loop_ult = num_inner_loop_ult;
+    //     computing_data.diff_count = diff_count;
+    //     computing_data.gain_type = gain_type;
+    //     computing_data.sep_gain = sep_gain;
+    //     computing_data.normalization = normalization;
+    //     computing_data.biased_IC = biased_IC;
+    //     computing_data.diff_vector = diff_vector;
+    //     computing_data.IC_vector = IC_vector;
 
-        threads.push_back(thread(workLoop,computing_data,ref(W_N_N_Vector),ref(W_N_W_Vector),
-        ref(W_N_diff_Vector),ref(W_N_Acc_Vector),ref(W_N_RT_Vector)));
-    }
+    //     threads.push_back(thread(workLoop,computing_data,ref(W_N_N_Vector),ref(W_N_W_Vector),
+    //     ref(W_N_diff_Vector),ref(W_N_Acc_Vector),ref(W_N_RT_Vector)));
+    // }
 
-    for (int i=0;i<threads.size();i++){
-        threads[i].join();
-    }
+    // for (int i=0;i<threads.size();i++){
+    //     threads[i].join();
+    // }
 
 
     //Behold again, the ultimate version for W vs. Diff
@@ -376,14 +398,14 @@ int main(){
 
     int num_outer_loop_ult_2 = 10;
     int num_inner_loop_ult_2 = 11;
-    int update_times_ult_2 = 5;
+    int update_times_ult_2 = 1;
     //double diff_ult = 0.5;
     vector<double> num_neuron_vector;
     num_neuron_vector.push_back(10);
     num_neuron_vector.push_back(50);
     num_neuron_vector.push_back(100);
 
-    int num_Fair_IC_ult_2 = 10;
+    int num_Fair_IC_ult_2 = 1;
     int num_Unfair_IC_ult_2 = 1;
     vector<int> IC_vector_2;
     IC_vector_2.push_back(num_Fair_IC_ult_2);
@@ -459,6 +481,10 @@ int main(){
     ofstream timeData("Data/Time.txt");
     ofstream x1Data("Data/x1.txt");
     ofstream x2Data("Data/x2.txt");
+    ofstream x3Data("Data/x3.txt");
+    ofstream x4Data("Data/x4.txt");
+    ofstream x5Data("Data/x5.txt");
+    ofstream xWinnerData("Data/x_w.txt");
     ofstream JmtxData("Data/J.txt");
     ofstream singleNetworkParameters("Data/SingleNetworkParameters.txt");
 
@@ -488,6 +514,10 @@ int main(){
         timeData << n1->t_data[i] << endl;
         x1Data << n1->x_data[i] << endl;
         x2Data << n2->x_data[i] << endl;
+        x3Data << n3->x_data[i] << endl;
+        x4Data << n4->x_data[i] << endl;
+        x5Data << n5->x_data[i] << endl;
+        xWinnerData << n_winner->x_data[i] << endl;
     }
 
     for (int i=0;i<num_networks;i++){

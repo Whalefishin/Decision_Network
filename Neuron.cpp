@@ -59,6 +59,16 @@ void Neuron::updateRK4(double (Neuron::*f)(double)){
         }
     }
 
+    if (number ==0){
+        cout << "K_1: " + to_string(k_1) << endl;
+        cout << "K_2: " + to_string(k_2) << endl;
+        cout << "K_3: " + to_string(k_3) << endl;
+        cout << "K_4: " + to_string(k_4) << endl;
+        
+        
+        //cout << (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0 << endl;
+    }
+
     //updating
     t_prev = t;
     x_prev = x;
@@ -81,6 +91,13 @@ double Neuron::computeRHS(double t, double x,double (Neuron::*f)(double)){
     }
 
     ret = rectLinearActiv(S - w * integratedSum) - lambda * x;
+    //cout << lambda * x << endl;
+    if (number == 0){
+        cout << "x: " + to_string(x) <<endl;
+        cout << "inhibition term: " + to_string(w * integratedSum) << endl;
+        cout << "Integrated: " + to_string(rectLinearActiv(S - w * integratedSum)) << endl;
+        cout << "ret: " + to_string(ret) << endl;
+    }
 
     return ret;    
 }
