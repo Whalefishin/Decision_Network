@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Neuron::Neuron(int number, double S, double lambda, double w, 
+Neuron::Neuron(int number, double S, double lambda, double w,
 double x_0, double t_0, double h){
     this->number = number;
     x = x_0;
@@ -16,8 +16,8 @@ double x_0, double t_0, double h){
 
     update_count =0;
     RT_sum = 0;
-    RT_threshold = 0.001;
-    RT_history = 200;
+    RT_threshold = 0.005;
+    RT_history = 2000;
     RT_collected = false;
     RT_Count = 0;
 
@@ -59,21 +59,11 @@ void Neuron::updateRK4(double (Neuron::*f)(double)){
         }
     }
 
-    if (number ==0){
-        cout << "K_1: " + to_string(k_1) << endl;
-        cout << "K_2: " + to_string(k_2) << endl;
-        cout << "K_3: " + to_string(k_3) << endl;
-        cout << "K_4: " + to_string(k_4) << endl;
-        
-        
-        //cout << (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0 << endl;
-    }
-
     //updating
     t_prev = t;
     x_prev = x;
     t += h;
-    x += (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0; 
+    x += (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
 
     //recording
     x_data.push_back(x);
@@ -91,15 +81,7 @@ double Neuron::computeRHS(double t, double x,double (Neuron::*f)(double)){
     }
 
     ret = rectLinearActiv(S - w * integratedSum) - lambda * x;
-    //cout << lambda * x << endl;
-    if (number == 0){
-        cout << "x: " + to_string(x) <<endl;
-        cout << "inhibition term: " + to_string(w * integratedSum) << endl;
-        cout << "Integrated: " + to_string(rectLinearActiv(S - w * integratedSum)) << endl;
-        cout << "ret: " + to_string(ret) << endl;
-    }
-
-    return ret;    
+    return ret;
 }
 
 void Neuron::updateRK4IntegrateAll(double (Neuron::*f)(double)){
@@ -133,7 +115,7 @@ void Neuron::updateRK4IntegrateAll(double (Neuron::*f)(double)){
     t_prev = t;
     x_prev = x;
     t += h;
-    x += (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0; 
+    x += (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
 
     //recording
     x_data.push_back(x);

@@ -14,6 +14,7 @@ mutex mtx;
 
 struct Data{
     double N;
+    double diff;
     int update_times;
     int num_inner_loop_ult;
     int diff_count;
@@ -22,6 +23,7 @@ struct Data{
     int normalization;
     int biased_IC;
     vector<double> diff_vector;
+    vector<double> neuron_vector;
     vector<int> IC_vector;
 };
 
@@ -29,7 +31,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
     vector<vector<double> >& W_N_W_Vector,
     vector<vector<double> >& W_N_diff_Vector,
     vector<vector<double> >& W_N_Acc_Vector,
-    vector<vector<double> >& W_N_RT_Vector){ 
+    vector<vector<double> >& W_N_RT_Vector){
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = (double)(j-1);
@@ -45,7 +47,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                             double RT_sum = 0; //IC avg.
                             for (int l=1;l<=num_IC;l++){
                                 double IC = 0.1 + 0.8/num_IC * l;
-                                Network network_3D(custom_data.N,W,1,0.1,n);
+                                Network network_3D(custom_data.N,W,1,0.01,n);
                                 network_3D.constructAllToAllNetwork();
                                 network_3D.initializeWithChoice(b,IC,diff_ult);
                                 for (int k = 0;k<custom_data.update_times;k++){
@@ -55,7 +57,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                                     }
                                 }
                                 Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
-                                RT_sum += network_3D.RT;                 
+                                RT_sum += network_3D.RT;
                             }
                             //data collection
                             //int index = b*1 + n*2 + s*4 + g*8;
@@ -75,6 +77,59 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
         }
     }
 }
+
+void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
+    vector<vector<double> >& W_Diff_W_Vector,
+    vector<vector<double> >& W_Diff_diff_Vector,
+    vector<vector<double> >& W_Diff_Acc_Vector,
+    vector<vector<double> >& W_Diff_RT_Vector){
+
+    for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
+        double W = (double)(j-1);
+        int index = 0;
+        for (int d=0;d<custom_data.diff_count;d++){
+            //double diff_ult = custom_data.diff_vector[d];
+            double neuron_count = custom_data.neuron_vector[d];
+            for (int g=0;g<custom_data.gain_type;g++){
+                for (int s=0;s<custom_data.sep_gain;s++){
+                    for (int n=0;n<custom_data.normalization;n++){
+                        for (int b=0;b<custom_data.biased_IC;b++){
+                            int num_IC = custom_data.IC_vector[b];                                //double w = 1.0;
+                            double Acc_sum =0; //IC avg.
+                            double RT_sum = 0; //IC avg.
+                            for (int l=1;l<=num_IC;l++){
+                                double IC = 0.1 + 0.8/num_IC * l;
+                                Network network_3D(custom_data.N,W,1,0.01,n);
+                                network_3D.constructAllToAllNetwork();
+                                network_3D.initializeWithChoice(b,IC,custom_data.diff);
+                                for (int k = 0;k<custom_data.update_times;k++){
+                                    network_3D.updateWithChoice(s,g);
+                                    if (k==custom_data.update_times-1){
+                                        network_3D.computeAccuracy();
+                                    }
+                                }
+                                Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                RT_sum += network_3D.RT;
+                            }
+                            //data collection
+                            //int index = b*1 + n*2 + s*4 + g*8;
+                            mtx.lock();
+                            W_Diff_N_Vector[index].push_back(neuron_count);
+                            W_Diff_W_Vector[index].push_back(W);
+                            W_Diff_diff_Vector[index].push_back(custom_data.diff);
+                            W_Diff_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                            W_Diff_RT_Vector[index].push_back(RT_sum/num_IC);
+                            mtx.unlock();
+                    //update index out of the simulation loop
+                            index++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 int main(){
@@ -284,7 +339,7 @@ int main(){
 
     int num_outer_loop_ult = 1;
     int num_inner_loop_ult = 1;
-    int update_times_ult = 1;
+    int update_times_ult = 5000;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
     diff_vector.push_back(0.2);
@@ -302,7 +357,7 @@ int main(){
     vector<vector<double> > W_N_diff_Vector;
     vector<vector<double> > W_N_Acc_Vector;
     vector<vector<double> > W_N_RT_Vector;
-    
+
     for (int i=0;i<diff_count*gain_type*sep_gain*normalization*biased_IC;i++){
         vector<double> toPush;
         W_N_N_Vector.push_back(toPush);
@@ -312,85 +367,92 @@ int main(){
         W_N_RT_Vector.push_back(toPush);
     }
 
-    
-    int index = 0;
-    for (int d=0;d<diff_count;d++){
-        double diff_ult = diff_vector[d];
-        for (int g=0;g<gain_type;g++){
-            for (int s=0;s<sep_gain;s++){
-                for (int n=0;n<normalization;n++){
-                    for (int b=0;b<biased_IC;b++){
-                        int num_IC = IC_vector[b];
-                        for (int i=1;i<=num_outer_loop_ult;i++){
-                            //double N = 10;
-                            double N = i*10;
-                            for (int j=1;j<=num_inner_loop_ult;j++){
-                                //double w = 1.0;
-                                double Acc_sum =0; //IC avg.
-                                double RT_sum = 0; //IC avg.
-                                double W = (double)(j-1);
-                                for (int l=1;l<=num_IC;l++){
-                                    double IC = 0.1 + 0.8/num_IC * l;
-                                    //cout << "here" <<endl;
-                                    Network network_3D(N,W,1,0.1,n);
-                                    network_3D.constructAllToAllNetwork();
-                                    network_3D.initializeWithChoice(b,IC,diff_ult);
-                                    //network_3D.initialize(0.5);
-                                    for (int k = 0;k<update_times_ult;k++){
-                                        network_3D.updateWithChoice(s,g);
-                                        if (k==update_times_ult-1){
-                                            network_3D.computeAccuracy();
-                                        }
-                                    }
-                                    Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
-                                    RT_sum += network_3D.RT;                               
-                                }
-                                //data collection
-                                //int index = b*1 + n*2 + s*4 + g*8;
-                                W_N_N_Vector[index].push_back(N);
-                                W_N_W_Vector[index].push_back(W);
-                                W_N_diff_Vector[index].push_back(diff_ult);
-                                W_N_Acc_Vector[index].push_back(Acc_sum/num_IC);
-                                W_N_RT_Vector[index].push_back(RT_sum/num_IC);
-                            }
-                        }
-                        //update index out of the simulation loop
-                        index++;
-                    }
-                }
-            }
-        }
-    }
-    
 
-   
+    // int index = 0;
+    // for (int d=0;d<diff_count;d++){
+    //     double diff_ult = diff_vector[d];
+    //     for (int g=0;g<gain_type;g++){
+    //         for (int s=0;s<sep_gain;s++){
+    //             for (int n=0;n<normalization;n++){
+    //                 for (int b=0;b<biased_IC;b++){
+    //                     int num_IC = IC_vector[b];
+    //                     for (int i=1;i<=num_outer_loop_ult;i++){
+    //                         //double N = 10;
+    //                         double N = i*10;
+    //                         for (int j=1;j<=num_inner_loop_ult;j++){
+    //                             //double w = 1.0;
+    //                             double Acc_sum =0; //IC avg.
+    //                             double RT_sum = 0; //IC avg.
+    //                             double W = (double)(j-1);
+    //                             for (int l=1;l<=num_IC;l++){
+    //                                 double IC = 0.1 + 0.8/num_IC * l;
+    //                                 //cout << "here" <<endl;
+    //                                 Network network_3D(N,W,1,0.1,n);
+    //                                 network_3D.constructAllToAllNetwork();
+    //                                 network_3D.initializeWithChoice(b,IC,diff_ult);
+    //                                 //network_3D.initialize(0.5);
+    //                                 for (int k = 0;k<update_times_ult;k++){
+    //                                     network_3D.updateWithChoice(s,g);
+    //                                     if (k==update_times_ult-1){
+    //                                         network_3D.computeAccuracy();
+    //                                     }
+    //                                 }
+    //                                 Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+    //                                 RT_sum += network_3D.RT;
+    //                             }
+    //                             //data collection
+    //                             //int index = b*1 + n*2 + s*4 + g*8;
+    //                             W_N_N_Vector[index].push_back(N);
+    //                             W_N_W_Vector[index].push_back(W);
+    //                             W_N_diff_Vector[index].push_back(diff_ult);
+    //                             W_N_Acc_Vector[index].push_back(Acc_sum/num_IC);
+    //                             W_N_RT_Vector[index].push_back(RT_sum/num_IC);
+    //                         }
+    //                     }
+    //                     //update index out of the simulation loop
+    //                     index++;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+
+
 
    //Parallel version
-    // int index = 0;
-    // vector<thread> threads;
+    int index = 0;
+    vector<thread> threads;
 
-    // Data computing_data;
+    Data computing_data;
 
-    // for (int i=1;i<=num_outer_loop_ult;i++){
-    //     double N = i*10;
-    //     computing_data.N = N;
-    //     computing_data.update_times = update_times_ult;
-    //     computing_data.num_inner_loop_ult = num_inner_loop_ult;
-    //     computing_data.diff_count = diff_count;
-    //     computing_data.gain_type = gain_type;
-    //     computing_data.sep_gain = sep_gain;
-    //     computing_data.normalization = normalization;
-    //     computing_data.biased_IC = biased_IC;
-    //     computing_data.diff_vector = diff_vector;
-    //     computing_data.IC_vector = IC_vector;
+    for (int i=1;i<=num_outer_loop_ult;i++){
+        double N = i*10;
+        computing_data.N = N;
+        computing_data.diff = 0;
+        computing_data.update_times = update_times_ult;
+        computing_data.num_inner_loop_ult = num_inner_loop_ult;
+        computing_data.diff_count = diff_count;
+        computing_data.gain_type = gain_type;
+        computing_data.sep_gain = sep_gain;
+        computing_data.normalization = normalization;
+        computing_data.biased_IC = biased_IC;
+        computing_data.diff_vector = diff_vector;
+        computing_data.IC_vector = IC_vector;
 
-    //     threads.push_back(thread(workLoop,computing_data,ref(W_N_N_Vector),ref(W_N_W_Vector),
-    //     ref(W_N_diff_Vector),ref(W_N_Acc_Vector),ref(W_N_RT_Vector)));
-    // }
+        threads.push_back(thread(workLoop,computing_data,ref(W_N_N_Vector),ref(W_N_W_Vector),
+        ref(W_N_diff_Vector),ref(W_N_Acc_Vector),ref(W_N_RT_Vector)));
+    }
 
-    // for (int i=0;i<threads.size();i++){
-    //     threads[i].join();
-    // }
+    for (int i=0;i<threads.size();i++){
+        threads[i].join();
+    }
+
+
+
+
+
+
 
 
     //Behold again, the ultimate version for W vs. Diff
@@ -398,7 +460,7 @@ int main(){
 
     int num_outer_loop_ult_2 = 10;
     int num_inner_loop_ult_2 = 11;
-    int update_times_ult_2 = 1;
+    int update_times_ult_2 = 5000;
     //double diff_ult = 0.5;
     vector<double> num_neuron_vector;
     num_neuron_vector.push_back(10);
@@ -416,7 +478,7 @@ int main(){
     vector<vector<double> > W_Diff_diff_Vector;
     vector<vector<double> > W_Diff_Acc_Vector;
     vector<vector<double> > W_Diff_RT_Vector;
-    
+
     for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC;i++){
         vector<double> toPush;
         W_Diff_N_Vector.push_back(toPush);
@@ -426,54 +488,84 @@ int main(){
         W_Diff_RT_Vector.push_back(toPush);
     }
 
+    // index = 0;
+    // for (int d=0;d<num_neuron_count;d++){
+    //     int N = num_neuron_vector[d];
+    //     for (int g=0;g<gain_type;g++){
+    //         for (int s=0;s<sep_gain;s++){
+    //             for (int n=0;n<normalization;n++){
+    //                 for (int b=0;b<biased_IC;b++){
+    //                     int num_IC = IC_vector_2[b];
+    //                     for (int i=1;i<=num_outer_loop_ult_2;i++){
+    //                         //double N = 10;
+    //                         //double N = i*10;
+    //                         double diff_ult = 0.1 + 0.8/num_outer_loop_ult_2 * i;
+    //                         for (int j=1;j<=num_inner_loop_ult_2;j++){
+    //                             //double w = 1.0;
+    //                             double Acc_sum =0; //IC avg.
+    //                             double RT_sum = 0; //IC avg.
+    //                             double W = (double)(j-1);
+    //                             for (int l=1;l<=num_IC;l++){
+    //                                 double IC = 0.1 + 0.8/num_IC * l;
+    //                                 //cout << "here" <<endl;
+    //                                 Network network_3D(N,W,1,0.1,n);
+    //                                 network_3D.constructAllToAllNetwork();
+    //                                 network_3D.initializeWithChoice(b,IC,diff_ult);
+    //                                 //network_3D.initialize(0.5);
+    //                                 for (int k = 0;k<update_times_ult_2;k++){
+    //                                     network_3D.updateWithChoice(s,g);
+    //                                     if (k==update_times_ult_2-1){
+    //                                         network_3D.computeAccuracy();
+    //                                     }
+    //                                 }
+    //                                 Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+    //                                 RT_sum += network_3D.RT;
+    //                             }
+    //                             //data collection
+    //                             //int index = b*1 + n*2 + s*4 + g*8;
+    //                             W_Diff_N_Vector[index].push_back(N);
+    //                             W_Diff_W_Vector[index].push_back(W);
+    //                             W_Diff_diff_Vector[index].push_back(diff_ult);
+    //                             W_Diff_Acc_Vector[index].push_back(Acc_sum/num_IC);
+    //                             W_Diff_RT_Vector[index].push_back(RT_sum/num_IC);
+    //                         }
+    //                     }
+    //                     //update index out of the simulation loop
+    //                     index++;
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+
+
+
     index = 0;
-    for (int d=0;d<num_neuron_count;d++){
-        int N = num_neuron_vector[d];
-        for (int g=0;g<gain_type;g++){
-            for (int s=0;s<sep_gain;s++){
-                for (int n=0;n<normalization;n++){
-                    for (int b=0;b<biased_IC;b++){
-                        int num_IC = IC_vector_2[b];
-                        for (int i=1;i<=num_outer_loop_ult_2;i++){
-                            //double N = 10;
-                            //double N = i*10;
-                            double diff_ult = 0.1 + 0.8/num_outer_loop_ult_2 * i;
-                            for (int j=1;j<=num_inner_loop_ult_2;j++){
-                                //double w = 1.0;
-                                double Acc_sum =0; //IC avg.
-                                double RT_sum = 0; //IC avg.
-                                double W = (double)(j-1);
-                                for (int l=1;l<=num_IC;l++){
-                                    double IC = 0.1 + 0.8/num_IC * l;
-                                    //cout << "here" <<endl;
-                                    Network network_3D(N,W,1,0.1,n);
-                                    network_3D.constructAllToAllNetwork();
-                                    network_3D.initializeWithChoice(b,IC,diff_ult);
-                                    //network_3D.initialize(0.5);
-                                    for (int k = 0;k<update_times_ult_2;k++){
-                                        network_3D.updateWithChoice(s,g);
-                                        if (k==update_times_ult_2-1){
-                                            network_3D.computeAccuracy();
-                                        }
-                                    }
-                                    Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
-                                    RT_sum += network_3D.RT;                               
-                                }
-                                //data collection
-                                //int index = b*1 + n*2 + s*4 + g*8;
-                                W_Diff_N_Vector[index].push_back(N);
-                                W_Diff_W_Vector[index].push_back(W);
-                                W_Diff_diff_Vector[index].push_back(diff_ult);
-                                W_Diff_Acc_Vector[index].push_back(Acc_sum/num_IC);
-                                W_Diff_RT_Vector[index].push_back(RT_sum/num_IC);
-                            }
-                        }
-                        //update index out of the simulation loop
-                        index++;
-                    }
-                }
-            }
-        }
+    vector<thread> threads_2;
+
+    Data computing_data_2;
+
+    for (int i=1;i<=num_outer_loop_ult_2;i++){
+        double diff = 0.1 + 0.8/num_outer_loop_ult_2 * i;
+        computing_data_2.N = 0;
+        computing_data_2.diff = diff;
+        computing_data_2.update_times = update_times_ult_2;
+        computing_data_2.num_inner_loop_ult = num_inner_loop_ult_2;
+        computing_data_2.diff_count = diff_count;
+        computing_data_2.gain_type = gain_type;
+        computing_data_2.sep_gain = sep_gain;
+        computing_data_2.normalization = normalization;
+        computing_data_2.biased_IC = biased_IC;
+        computing_data_2.diff_vector = diff_vector;
+        computing_data_2.neuron_vector = num_neuron_vector;
+        computing_data_2.IC_vector = IC_vector_2;
+
+        threads_2.push_back(thread(workLoop_2,computing_data_2,ref(W_Diff_N_Vector),ref(W_Diff_W_Vector),
+        ref(W_Diff_diff_Vector),ref(W_Diff_Acc_Vector),ref(W_Diff_RT_Vector)));
+    }
+
+    for (int i=0;i<threads_2.size();i++){
+        threads_2[i].join();
     }
 
 
@@ -572,7 +664,7 @@ int main(){
     string W_N_base_name = "W_N";
 
     index=0;
-    
+
     for (int d=0;d<diff_count;d++){
         for (int g=0;g<gain_type;g++){
             for (int s=0;s<sep_gain;s++){
@@ -630,7 +722,7 @@ int main(){
     string base_name = "W_Diff";
 
     index=0;
-    
+
     for (int d=0;d<num_neuron_count;d++){
         for (int g=0;g<gain_type;g++){
             for (int s=0;s<sep_gain;s++){
