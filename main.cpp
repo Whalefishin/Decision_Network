@@ -136,8 +136,8 @@ int main(){
     //fixed random seed for consistency
     srand(6);
 
-    int single_Network_neurons = 50;
-    Network* network = new Network(single_Network_neurons,5,1,0.01,1);
+    int single_Network_neurons = 20;
+    Network* network = new Network(single_Network_neurons,10,1,0.01,0);
 
     Neuron* n1 = network->neuron_vector[0];
     Neuron* n2 = network->neuron_vector[1];
@@ -162,8 +162,8 @@ int main(){
         Neuron* n = network->neuron_vector[i];
         //n->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
         //cout << n->x << endl;
-        n->x = 0;
-        n->x_prev = 0;
+        n->x = 0.5;
+        n->x_prev = n->x;
         n->S = 0.2;
     }
 
@@ -173,7 +173,7 @@ int main(){
 
     int update_times = 5000;
     for (int t=0;t<update_times;t++){
-        network->update(&Neuron::sigmActiv);
+        network->updateIntegrateAll(&Neuron::binaryActiv);
         if (t == update_times-1){ //last loop, collect accuracy
             network->computeAccuracy();
         }

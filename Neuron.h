@@ -9,7 +9,7 @@
 
 class Neuron{
     public:
-    Neuron(int number, double S, double lambda, double w, 
+    Neuron(int number, double S, double lambda, double w,
     double x_0, double t_0, double h);
 
     //~Neuron();
@@ -19,7 +19,7 @@ class Neuron{
 
     void updateRK4IntegrateAll(double (Neuron::*f)(double)); //difference is if gain fcn incoporates S, the evidence
     double computeRHSIntegrateAll(double t, double x, double (Neuron::*f)(double));
-    
+
     double linearActiv(double x); //linear activation function
     double sigmActiv(double x); //sigmodal activation funciton
     double rectLinearActiv(double x); //linear on the positive side, zero otherwise.
@@ -47,6 +47,9 @@ class Neuron{
     int RT_history; //number of history wanted.
     bool RT_collected;
     int RT_Count;
+    double jump_ratio;
+    double jump_variation_allowance;
+    double prev_jump_peak;
 
     vector<double> x_data;
     vector<double> t_data;
