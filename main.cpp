@@ -99,7 +99,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                             double RT_sum = 0; //IC avg.
                             for (int l=1;l<=num_IC;l++){
                                 double IC = 0.1 + 0.8/num_IC * l;
-                                Network network_3D(custom_data.N,W,1,0.01,n);
+                                Network network_3D(neuron_count,W,1,0.01,n);
                                 network_3D.constructAllToAllNetwork();
                                 network_3D.initializeWithChoice(b,IC,custom_data.diff);
                                 for (int k = 0;k<custom_data.update_times;k++){
@@ -337,8 +337,8 @@ int main(){
     int biased_IC = 2;
     int diff_count = 3;
 
-    int num_outer_loop_ult = 1;
-    int num_inner_loop_ult = 1;
+    int num_outer_loop_ult = 10;
+    int num_inner_loop_ult = 11;
     int update_times_ult = 5000;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
@@ -346,8 +346,8 @@ int main(){
     diff_vector.push_back(0.5);
     diff_vector.push_back(0.8);
 
-    int num_Fair_IC_ult = 1;
-    int num_Unfair_IC_ult = 1;
+    int num_Fair_IC_ult = 10;
+    int num_Unfair_IC_ult = 100;
     vector<int> IC_vector;
     IC_vector.push_back(num_Fair_IC_ult);
     IC_vector.push_back(num_Unfair_IC_ult);
@@ -467,8 +467,8 @@ int main(){
     num_neuron_vector.push_back(50);
     num_neuron_vector.push_back(100);
 
-    int num_Fair_IC_ult_2 = 1;
-    int num_Unfair_IC_ult_2 = 1;
+    int num_Fair_IC_ult_2 = 10;
+    int num_Unfair_IC_ult_2 = 100;
     vector<int> IC_vector_2;
     IC_vector_2.push_back(num_Fair_IC_ult_2);
     IC_vector_2.push_back(num_Unfair_IC_ult_2);

@@ -60,6 +60,7 @@ void Network::initializeFairIC(double IC, double diff){
     for (int i=0;i<num_neurons;i++){
         neuron_vector[i]->S = 1.0-diff;
         neuron_vector[i]->x = IC;
+        neuron_vector[i]->x_prev = neuron_vector[i]->x;
     }
     int winner_num = rand() % num_neurons;
     neuron_vector[winner_num]->S = 1.0;
@@ -72,6 +73,7 @@ void Network::initializeRandomIC(double diff){
     for (int i=0;i<num_neurons;i++){
         neuron_vector[i]->S = 1.0-diff;
         neuron_vector[i]->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        neuron_vector[i]->x_prev = neuron_vector[i]->x;
     }
     int winner_num = rand() % num_neurons;
     neuron_vector[winner_num]->S = 1.0;
