@@ -122,6 +122,44 @@ void Network::update(double (Neuron::*f)(double)){
     }
 }
 
+void Network::update(double (Neuron::*f)(double), int c){
+    time += time_step;
+    bool RT_achieved = true;
+
+    for (int i =0; i<num_neurons;i++){
+        Neuron* toUpdate = neuron_vector[i];
+        toUpdate->updateRK4(f,c);
+        // if (toUpdate->update_count > toUpdate->RT_history){
+        //     if (toUpdate->RT_sum > toUpdate->RT_threshold){ //not yet RT
+        //         RT_achieved = false;
+        //     }
+        // }
+        // else{
+        //     RT_achieved = false;
+        // }
+        if (toUpdate->RT_Count < toUpdate->RT_history){
+            RT_achieved = false;
+        }
+    }
+
+    if (RT==0){ //this part sets the RT should it be achieved.
+        if (RT_achieved){
+            for (int i=0;i<num_neurons;i++){
+                Neuron* toUpdate = neuron_vector[i];
+                toUpdate->RT_collected = true;
+            }
+            RT = time;
+        }
+    }
+
+    //after updating everyone, renew the history
+    for (int i=0;i<num_neurons;i++){
+        Neuron* toUpdate = neuron_vector[i];
+        toUpdate->t_prev = toUpdate->t;
+        toUpdate->x_prev = toUpdate->x;
+    }
+}
+
 void Network::updateIntegrateAll(double (Neuron::*f)(double)){
     time += time_step;
     bool RT_achieved = true;

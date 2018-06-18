@@ -136,8 +136,8 @@ int main(){
     //fixed random seed for consistency
     srand(6);
 
-    int single_Network_neurons = 20;
-    Network* network = new Network(single_Network_neurons,10,1,0.01,0);
+    int single_Network_neurons = 10;
+    Network* network = new Network(single_Network_neurons,5,1,0.1,0);
 
     Neuron* n1 = network->neuron_vector[0];
     Neuron* n2 = network->neuron_vector[1];
@@ -164,16 +164,16 @@ int main(){
         //cout << n->x << endl;
         n->x = 0.5;
         n->x_prev = n->x;
-        n->S = 0.2;
+        n->S = 0.8;
     }
 
     //winner parameters
     n1->S = 1.0;
     network->winners.push_back(n1);
 
-    int update_times = 5000;
+    int update_times = 500;
     for (int t=0;t<update_times;t++){
-        network->updateIntegrateAll(&Neuron::binaryActiv);
+        network->update(&Neuron::binaryActiv);
         if (t == update_times-1){ //last loop, collect accuracy
             network->computeAccuracy();
         }
@@ -339,15 +339,15 @@ int main(){
 
     int num_outer_loop_ult = 10;
     int num_inner_loop_ult = 11;
-    int update_times_ult = 5000;
+    int update_times_ult = 1;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
     diff_vector.push_back(0.2);
     diff_vector.push_back(0.5);
     diff_vector.push_back(0.8);
 
-    int num_Fair_IC_ult = 10;
-    int num_Unfair_IC_ult = 100;
+    int num_Fair_IC_ult = 1;
+    int num_Unfair_IC_ult = 1;
     vector<int> IC_vector;
     IC_vector.push_back(num_Fair_IC_ult);
     IC_vector.push_back(num_Unfair_IC_ult);
@@ -460,15 +460,15 @@ int main(){
 
     int num_outer_loop_ult_2 = 10;
     int num_inner_loop_ult_2 = 11;
-    int update_times_ult_2 = 5000;
+    int update_times_ult_2 = 1;
     //double diff_ult = 0.5;
     vector<double> num_neuron_vector;
     num_neuron_vector.push_back(10);
     num_neuron_vector.push_back(50);
     num_neuron_vector.push_back(100);
 
-    int num_Fair_IC_ult_2 = 10;
-    int num_Unfair_IC_ult_2 = 100;
+    int num_Fair_IC_ult_2 = 1;
+    int num_Unfair_IC_ult_2 = 1;
     vector<int> IC_vector_2;
     IC_vector_2.push_back(num_Fair_IC_ult_2);
     IC_vector_2.push_back(num_Unfair_IC_ult_2);

@@ -16,8 +16,9 @@ double x_0, double t_0, double h){
 
     update_count =0;
     RT_sum = 0;
-    RT_threshold = 0.001;
-    RT_history = 2000;
+    RT_threshold = 0.01;
+    mean_threshold = 0.001;
+    RT_history = 200;
     RT_collected = false;
     RT_Count = 0;
     jump_ratio = 10;
@@ -31,7 +32,6 @@ double x_0, double t_0, double h){
 // Neuron::~Neuron(){
 
 // }
-
 
 void Neuron::updateRK4(double (Neuron::*f)(double)){
 
@@ -52,23 +52,107 @@ void Neuron::updateRK4(double (Neuron::*f)(double)){
     //     }
     // }
 
+    // if (!RT_collected){
+    //     double d = (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
+    //     RT_sum += d;
+    //     d_history.push_back(d);
+    //     if (update_count >=RT_history){
+    //         RT_sum -= d_history[0];
+    //         d_history.erase(d_history.begin());
+    //     }
+    //     if (fabs(d) < RT_threshold){
+    //         RT_Count++;
+    //     }
+    //     else{
+    //         if (RT_sum/d_history.size() > mean_threshold){ //mean is fluctuation
+    //             RT_Count = 0;
+    //         }
+    //     //   double d_prev = fabs(x_data[x_data.size()-1] - x_data[x_data.size()-2]);
+    //     //   if (d/d_prev >jump_ratio){ //this is a jump
+    //     //     double jump_peak = x+d;
+    //     //     if (fabs(jump_peak-prev_jump_peak) > jump_variation_allowance && prev_jump_peak !=0){ //jumps are changing their peaks
+    //     //       RT_Count = 0;
+    //     //     }
+    //     //     prev_jump_peak = jump_peak;
+    //     //   }
+    //     //   else{ //this is not a jump
+    //     //     RT_Count = 0;
+    //     //   }
+    //     // }
+    //     }
+    // }
     if (!RT_collected){
-        double d = fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
-        if (d < RT_threshold){
+        double d = (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
+        RT_sum += d;
+        d_history.push_back(d);
+        if (update_count >=RT_history){
+            RT_sum -= d_history[0];
+            d_history.erase(d_history.begin());
+        }
+        if (fabs(d) < RT_threshold){
             RT_Count++;
         }
         else{
-          double d_prev = fabs(x_data[x_data.size()-1] - x_data[x_data.size()-2]);
-          if (d/d_prev >jump_ratio){ //this is a jump
-            double jump_peak = x+d;
-            if (fabs(jump_peak-prev_jump_peak) > jump_variation_allowance && prev_jump_peak !=0){ //jumps are changing their peaks
-              RT_Count = 0;
+            if (fabs(RT_sum/d_history.size()) > mean_threshold){ //mean is fluctuation
+                RT_Count = 0;
             }
-            prev_jump_peak = jump_peak;
-          }
-          else{ //this is not a jump
-            RT_Count = 0;
-          }
+            else{
+                RT_Count++;
+            }
+        }
+    }
+
+
+
+    //updating
+    t_prev = t;
+    x_prev = x;
+    t += h;
+    x += (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
+
+    //recording
+    x_data.push_back(x);
+    t_data.push_back(t);
+}
+
+
+void Neuron::updateRK4(double (Neuron::*f)(double), int c){
+
+    update_count++;
+
+    double k_1 = h * computeRHS(this->t, this->x, (f));
+    double k_2 = h * computeRHS(this->t + (h/2.0), this->x + (k_1/2.0), (f));
+    double k_3 = h * computeRHS(this->t + (h/2.0), this->x + (k_2/2.0), (f));
+    double k_4 = h * computeRHS(this->t + (h), this->x + (k_3), (f));
+
+    //data collection for Reaction Time
+    // if (!RT_collected){
+    //     RT_sum += fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
+    //     //RT_vector.push_back(fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0));
+    //     if (update_count > RT_history){
+    //         //RT_sum -= RT_vector[0];
+    //         //RT_vector.erase(RT_vector.begin());
+    //     }
+    // }
+
+    if (!RT_collected){
+        double d = (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
+        RT_sum += d;
+        d_history.push_back(d);
+        if (update_count >=RT_history){
+            RT_sum -= d_history[0];
+            d_history.erase(d_history.begin());
+        }
+        if (fabs(d) < RT_threshold){
+            RT_Count++;
+        }
+        else{
+            if (fabs(RT_sum/d_history.size()) > mean_threshold){ //mean is fluctuation
+                RT_Count = 0;
+            }
+            else{
+                RT_Count++;
+            }
         }
     }
 
@@ -115,28 +199,23 @@ void Neuron::updateRK4IntegrateAll(double (Neuron::*f)(double)){
     // }
 
     if (!RT_collected){
-        double d = fabs((k_1 + 2*k_2 + 2*k_3 + k_4)/6.0);
-        if (d < RT_threshold){
+        double d = (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
+        RT_sum += d;
+        d_history.push_back(d);
+        if (update_count >=RT_history){
+            RT_sum -= d_history[0];
+            d_history.erase(d_history.begin());
+        }
+        if (fabs(d) < RT_threshold){
             RT_Count++;
         }
-        // else{
-        //   double d_prev = fabs(x_data[x_data.size()-1] - x_data[x_data.size()-2]);
-        //   if (d/d_prev < jump_ratio){ //this is not a jump
-        //       RT_Count = 0;
-        //   }
-        // }
         else{
-          double d_prev = fabs(x_data[x_data.size()-1] - x_data[x_data.size()-2]);
-          if (d/d_prev >jump_ratio){ //this is a jump
-            double jump_peak = x+d;
-            if (fabs(jump_peak-prev_jump_peak) > jump_variation_allowance && prev_jump_peak !=0){ //jumps are changing their peaks
-              RT_Count = 0;
+            if (fabs(RT_sum/d_history.size()) > mean_threshold){ //mean is fluctuation
+                RT_Count = 0;
             }
-            prev_jump_peak = jump_peak;
-          }
-          else{ //this is not a jump
-            RT_Count = 0;
-          }
+            else{
+                RT_Count++;
+            }
         }
     }
 

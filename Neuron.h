@@ -14,7 +14,8 @@ class Neuron{
 
     //~Neuron();
 
-    void updateRK4(double (Neuron::*f)(double)); //parameter specifies which activiation fcn to use.
+    void updateRK4(double (Neuron::*f)(double));
+    void updateRK4(double (Neuron::*f)(double),int c); //parameter specifies which activiation fcn to use.
     double computeRHS(double t, double x,double (Neuron::*f)(double));
 
     void updateRK4IntegrateAll(double (Neuron::*f)(double)); //difference is if gain fcn incoporates S, the evidence
@@ -50,6 +51,8 @@ class Neuron{
     double jump_ratio;
     double jump_variation_allowance;
     double prev_jump_peak;
+    vector<double> d_history;
+    double mean_threshold;
 
     vector<double> x_data;
     vector<double> t_data;
