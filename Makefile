@@ -1,6 +1,6 @@
 # Configure compiler settings
 CXX=clang++
-CXXFLAGS= -g -std=c++11 -Werror -O3 
+CXXFLAGS= -g -std=c++11 -Werror -O3 -pthread
 # The object files for the program.
 OFILES = Network.o Neuron.o
 # The header files for the program

@@ -47,7 +47,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                             double RT_sum = 0; //IC avg.
                             for (int l=1;l<=num_IC;l++){
                                 double IC = 0.1 + 0.8/num_IC * l;
-                                Network network_3D(custom_data.N,W,1,0.01,n);
+                                Network network_3D(custom_data.N,W,1,0.1,n);
                                 network_3D.constructAllToAllNetwork();
                                 network_3D.initializeWithChoice(b,IC,diff_ult);
                                 for (int k = 0;k<custom_data.update_times;k++){
@@ -99,7 +99,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                             double RT_sum = 0; //IC avg.
                             for (int l=1;l<=num_IC;l++){
                                 double IC = 0.1 + 0.8/num_IC * l;
-                                Network network_3D(neuron_count,W,1,0.01,n);
+                                Network network_3D(neuron_count,W,1,0.1,n);
                                 network_3D.constructAllToAllNetwork();
                                 network_3D.initializeWithChoice(b,IC,custom_data.diff);
                                 for (int k = 0;k<custom_data.update_times;k++){
@@ -136,8 +136,8 @@ int main(){
     //fixed random seed for consistency
     srand(6);
 
-    int single_Network_neurons = 10;
-    Network* network = new Network(single_Network_neurons,5,1,0.1,0);
+    int single_Network_neurons = 50;
+    Network* network = new Network(single_Network_neurons,10,1,0.1,1);
 
     Neuron* n1 = network->neuron_vector[0];
     Neuron* n2 = network->neuron_vector[1];
@@ -173,7 +173,7 @@ int main(){
 
     int update_times = 500;
     for (int t=0;t<update_times;t++){
-        network->update(&Neuron::binaryActiv);
+        network->updateIntegrateAll(&Neuron::binaryActiv);
         if (t == update_times-1){ //last loop, collect accuracy
             network->computeAccuracy();
         }
@@ -339,15 +339,15 @@ int main(){
 
     int num_outer_loop_ult = 10;
     int num_inner_loop_ult = 11;
-    int update_times_ult = 1;
+    int update_times_ult = 1000;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
     diff_vector.push_back(0.2);
     diff_vector.push_back(0.5);
     diff_vector.push_back(0.8);
 
-    int num_Fair_IC_ult = 1;
-    int num_Unfair_IC_ult = 1;
+    int num_Fair_IC_ult = 10;
+    int num_Unfair_IC_ult = 100;
     vector<int> IC_vector;
     IC_vector.push_back(num_Fair_IC_ult);
     IC_vector.push_back(num_Unfair_IC_ult);
@@ -460,15 +460,15 @@ int main(){
 
     int num_outer_loop_ult_2 = 10;
     int num_inner_loop_ult_2 = 11;
-    int update_times_ult_2 = 1;
+    int update_times_ult_2 = 1000;
     //double diff_ult = 0.5;
     vector<double> num_neuron_vector;
     num_neuron_vector.push_back(10);
     num_neuron_vector.push_back(50);
     num_neuron_vector.push_back(100);
 
-    int num_Fair_IC_ult_2 = 1;
-    int num_Unfair_IC_ult_2 = 1;
+    int num_Fair_IC_ult_2 = 10;
+    int num_Unfair_IC_ult_2 = 100;
     vector<int> IC_vector_2;
     IC_vector_2.push_back(num_Fair_IC_ult_2);
     IC_vector_2.push_back(num_Unfair_IC_ult_2);
