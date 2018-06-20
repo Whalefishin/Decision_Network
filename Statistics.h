@@ -23,6 +23,11 @@ inline double standardDeviation(vector<double> data){
   for (int i=0;i<data.size();i++){
     sum += pow(data[i]-m,2);
   }
+
+  if (size==0){
+    return 0;
+  }
+
   return sqrt(sum/size);
 };
 

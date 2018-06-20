@@ -15,6 +15,7 @@ mutex mtx;
 struct Data{
     double N;
     double diff;
+    double p;
     int update_times;
     int num_inner_loop_ult;
     int diff_count;
@@ -27,11 +28,15 @@ struct Data{
     vector<int> IC_vector;
 };
 
+//WorkLoop for W vs. N
 void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
     vector<vector<double> >& W_N_W_Vector,
     vector<vector<double> >& W_N_diff_Vector,
     vector<vector<double> >& W_N_Acc_Vector,
-    vector<vector<double> >& W_N_RT_Vector){
+    vector<vector<double> >& W_N_RT_Vector,
+    vector<vector<double> >& W_N_Acc_Var_Vector,
+    vector<vector<double> >& W_N_RT_Var_Vector
+  ){
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = (double)(j-1);
@@ -45,6 +50,8 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                             int num_IC = custom_data.IC_vector[b];                                //double w = 1.0;
                             double Acc_sum =0; //IC avg.
                             double RT_sum = 0; //IC avg.
+                            vector<double> variance_Acc;
+                            vector<double> variance_RT;
                             for (int l=1;l<=num_IC;l++){
                                 double IC = 0.1 + 0.8/num_IC * l;
                                 Network network_3D(custom_data.N,W,1,0.1,n);
@@ -56,6 +63,8 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                                         network_3D.computeAccuracy();
                                     }
                                 }
+                                variance_Acc.push_back(network_3D.Acc);
+                                variance_RT.push_back(network_3D.RT);
                                 Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                 RT_sum += network_3D.RT;
                             }
@@ -67,6 +76,8 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                             W_N_diff_Vector[index].push_back(diff_ult);
                             W_N_Acc_Vector[index].push_back(Acc_sum/num_IC);
                             W_N_RT_Vector[index].push_back(RT_sum/num_IC);
+                            W_N_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
+                            W_N_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
                             mtx.unlock();
                     //update index out of the simulation loop
                             index++;
@@ -78,11 +89,14 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
     }
 }
 
+//Work loop for W vs. Diff
 void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
     vector<vector<double> >& W_Diff_W_Vector,
     vector<vector<double> >& W_Diff_diff_Vector,
     vector<vector<double> >& W_Diff_Acc_Vector,
-    vector<vector<double> >& W_Diff_RT_Vector){
+    vector<vector<double> >& W_Diff_RT_Vector,
+    vector<vector<double> >& W_Diff_Acc_Var_Vector,
+    vector<vector<double> >& W_Diff_RT_Var_Vector){
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = (double)(j-1);
@@ -97,6 +111,8 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                             int num_IC = custom_data.IC_vector[b];                                //double w = 1.0;
                             double Acc_sum =0; //IC avg.
                             double RT_sum = 0; //IC avg.
+                            vector<double> variance_Acc;
+                            vector<double> variance_RT;
                             for (int l=1;l<=num_IC;l++){
                                 double IC = 0.1 + 0.8/num_IC * l;
                                 Network network_3D(neuron_count,W,1,0.1,n);
@@ -108,6 +124,8 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                                         network_3D.computeAccuracy();
                                     }
                                 }
+                                variance_Acc.push_back(network_3D.Acc);
+                                variance_RT.push_back(network_3D.RT);
                                 Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                 RT_sum += network_3D.RT;
                             }
@@ -119,6 +137,8 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                             W_Diff_diff_Vector[index].push_back(custom_data.diff);
                             W_Diff_Acc_Vector[index].push_back(Acc_sum/num_IC);
                             W_Diff_RT_Vector[index].push_back(RT_sum/num_IC);
+                            W_Diff_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
+                            W_Diff_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
                             mtx.unlock();
                     //update index out of the simulation loop
                             index++;
@@ -130,6 +150,69 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
     }
 }
 
+void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
+  vector<vector<double> >& W_P_P_Vector,
+    vector<vector<double> >& W_P_W_Vector,
+    vector<vector<double> >& W_P_diff_Vector,
+    vector<vector<double> >& W_P_Acc_Vector,
+    vector<vector<double> >& W_P_RT_Vector,
+    vector<vector<double> >& W_P_Acc_Var_Vector,
+        vector<vector<double> >& W_P_RT_Var_Vector){
+
+    int k =1;
+
+    for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
+        double W = (double)(j-1);
+        int index = 0;
+        for (int d=0;d<custom_data.diff_count;d++){
+            double diff_ult = custom_data.diff_vector[d];
+            for (int g=0;g<custom_data.gain_type;g++){
+                for (int s=0;s<custom_data.sep_gain;s++){
+                    for (int n=0;n<custom_data.normalization;n++){
+                        for (int b=0;b<custom_data.biased_IC;b++){
+                            int num_IC = custom_data.IC_vector[b];
+                            double Acc_sum =0; //IC avg.
+                            double RT_sum = 0; //IC avg.
+                            vector<double> variance_Acc;
+                            vector<double> variance_RT;
+                            for (int l=1;l<=num_IC;l++){
+                                double IC = 0.1 + 0.8/num_IC * l;
+                                Network network_3D(custom_data.N,W,1,0.1,n);
+                                //network_3D.constructAllToAllNetwork();
+                                network_3D.constructSmallWorldNetwork(k,custom_data.p);
+                                network_3D.initializeWithChoice(b,IC,diff_ult);
+                                for (int k = 0;k<custom_data.update_times;k++){
+                                    network_3D.updateWithChoice(s,g);
+                                    if (k==custom_data.update_times-1){
+                                        network_3D.computeAccuracy();
+                                    }
+                                }
+                                variance_Acc.push_back(network_3D.Acc);
+                                variance_RT.push_back(network_3D.RT);
+                                Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                RT_sum += network_3D.RT;
+                            }
+                            //data collection
+                            //int index = b*1 + n*2 + s*4 + g*8;
+                            mtx.lock();
+                            W_P_N_Vector[index].push_back(custom_data.N);
+                            W_P_P_Vector[index].push_back(custom_data.p);
+                            W_P_W_Vector[index].push_back(W);
+                            W_P_diff_Vector[index].push_back(diff_ult);
+                            W_P_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                            W_P_RT_Vector[index].push_back(RT_sum/num_IC);
+                            W_P_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
+                            W_P_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
+                            mtx.unlock();
+                    //update index out of the simulation loop
+                            index++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 int main(){
@@ -209,7 +292,7 @@ int main(){
 
     //scaling
     int num_networks = 10;
-    int update_times_scaling = 10;
+    int update_times_scaling = 0;
     for (int i=0;i<num_networks;i++){
         //initialize
         double w = (double)i;
@@ -242,7 +325,7 @@ int main(){
     //3D plots
     int num_outer_loop = 10;
     int num_inner_loop = 11;
-    int update_times_3D = 1;
+    int update_times_3D = 0;
 
     vector<double> w_Vector_3D;
     vector<double> N_Vector_3D;
@@ -282,7 +365,7 @@ int main(){
     //3D with averaged fair IC
     int num_outer_loop_AVG_Fair = 10;
     int num_inner_loop_AVG_Fair = 11;
-    int update_times_3D_AVG_Fair = 5;
+    int update_times_3D_AVG_Fair = 0;
     int num_IC_AVG_Fair = 10; //number of IC to avg.
 
     vector<double> w_Vector_3D_AVG_Fair;
@@ -357,6 +440,8 @@ int main(){
     vector<vector<double> > W_N_diff_Vector;
     vector<vector<double> > W_N_Acc_Vector;
     vector<vector<double> > W_N_RT_Vector;
+    vector<vector<double> > W_N_Acc_Var_Vector;
+    vector<vector<double> > W_N_RT_Var_Vector;
 
     for (int i=0;i<diff_count*gain_type*sep_gain*normalization*biased_IC;i++){
         vector<double> toPush;
@@ -365,6 +450,8 @@ int main(){
         W_N_diff_Vector.push_back(toPush);
         W_N_Acc_Vector.push_back(toPush);
         W_N_RT_Vector.push_back(toPush);
+        W_N_Acc_Var_Vector.push_back(toPush);
+        W_N_RT_Var_Vector.push_back(toPush);
     }
 
 
@@ -419,7 +506,6 @@ int main(){
 
 
 
-
    //Parallel version
     int index = 0;
     vector<thread> threads;
@@ -430,6 +516,7 @@ int main(){
         double N = i*10;
         computing_data.N = N;
         computing_data.diff = 0;
+        computing_data.p = 0;
         computing_data.update_times = update_times_ult;
         computing_data.num_inner_loop_ult = num_inner_loop_ult;
         computing_data.diff_count = diff_count;
@@ -441,16 +528,13 @@ int main(){
         computing_data.IC_vector = IC_vector;
 
         threads.push_back(thread(workLoop,computing_data,ref(W_N_N_Vector),ref(W_N_W_Vector),
-        ref(W_N_diff_Vector),ref(W_N_Acc_Vector),ref(W_N_RT_Vector)));
+        ref(W_N_diff_Vector),ref(W_N_Acc_Vector),ref(W_N_RT_Vector), ref(W_N_Acc_Var_Vector),
+      ref(W_N_RT_Var_Vector)));
     }
 
     for (int i=0;i<threads.size();i++){
         threads[i].join();
     }
-
-
-
-
 
 
 
@@ -478,6 +562,8 @@ int main(){
     vector<vector<double> > W_Diff_diff_Vector;
     vector<vector<double> > W_Diff_Acc_Vector;
     vector<vector<double> > W_Diff_RT_Vector;
+    vector<vector<double> > W_Diff_Acc_Var_Vector;
+    vector<vector<double> > W_Diff_RT_Var_Vector;
 
     for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC;i++){
         vector<double> toPush;
@@ -486,6 +572,8 @@ int main(){
         W_Diff_diff_Vector.push_back(toPush);
         W_Diff_Acc_Vector.push_back(toPush);
         W_Diff_RT_Vector.push_back(toPush);
+        W_Diff_Acc_Var_Vector.push_back(toPush);
+        W_Diff_RT_Var_Vector.push_back(toPush);
     }
 
     // index = 0;
@@ -549,6 +637,7 @@ int main(){
         double diff = 0.1 + 0.8/num_outer_loop_ult_2 * i;
         computing_data_2.N = 0;
         computing_data_2.diff = diff;
+        computing_data_2.p = 0;
         computing_data_2.update_times = update_times_ult_2;
         computing_data_2.num_inner_loop_ult = num_inner_loop_ult_2;
         computing_data_2.diff_count = diff_count;
@@ -561,13 +650,78 @@ int main(){
         computing_data_2.IC_vector = IC_vector_2;
 
         threads_2.push_back(thread(workLoop_2,computing_data_2,ref(W_Diff_N_Vector),ref(W_Diff_W_Vector),
-        ref(W_Diff_diff_Vector),ref(W_Diff_Acc_Vector),ref(W_Diff_RT_Vector)));
+        ref(W_Diff_diff_Vector),ref(W_Diff_Acc_Vector),ref(W_Diff_RT_Vector), ref(W_Diff_Acc_Var_Vector),
+      ref(W_Diff_RT_Var_Vector)));
     }
 
     for (int i=0;i<threads_2.size();i++){
         threads_2[i].join();
     }
 
+
+
+
+    //Behold one last time, the ultimate version for W vs. P
+    int num_outer_loop_ult_3 = 11;
+    int num_inner_loop_ult_3 = 11;
+    int update_times_ult_3 = 1;
+
+    int num_Fair_IC_ult_3 = 10;
+    int num_Unfair_IC_ult_3 = 100;
+    vector<int> IC_vector_3;
+    IC_vector_3.push_back(num_Fair_IC_ult_3);
+    IC_vector_3.push_back(num_Unfair_IC_ult_3);
+
+    vector<vector<double> > W_P_N_Vector;
+    vector<vector<double> > W_P_P_Vector;
+    vector<vector<double> > W_P_W_Vector;
+    vector<vector<double> > W_P_diff_Vector;
+    vector<vector<double> > W_P_Acc_Vector;
+    vector<vector<double> > W_P_RT_Vector;
+    vector<vector<double> > W_P_Acc_Var_Vector;
+    vector<vector<double> > W_P_RT_Var_Vector;
+
+    for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC;i++){
+        vector<double> toPush;
+        W_P_N_Vector.push_back(toPush);
+        W_P_P_Vector.push_back(toPush);
+        W_P_W_Vector.push_back(toPush);
+        W_P_diff_Vector.push_back(toPush);
+        W_P_Acc_Vector.push_back(toPush);
+        W_P_RT_Vector.push_back(toPush);
+        W_P_Acc_Var_Vector.push_back(toPush);
+        W_P_RT_Var_Vector.push_back(toPush);
+    }
+
+    index = 0;
+    vector<thread> threads_3;
+
+    Data computing_data_3;
+
+    for (int i=1;i<=num_outer_loop_ult_3;i++){
+        double p = pow(2,i-num_outer_loop_ult_3);
+        computing_data_3.N = 10;
+        computing_data_3.diff = 0;
+        computing_data_3.p = p;
+        computing_data_3.update_times = update_times_ult_3;
+        computing_data_3.num_inner_loop_ult = num_inner_loop_ult_3;
+        computing_data_3.diff_count = diff_count;
+        computing_data_3.gain_type = gain_type;
+        computing_data_3.sep_gain = sep_gain;
+        computing_data_3.normalization = normalization;
+        computing_data_3.biased_IC = biased_IC;
+        computing_data_3.diff_vector = diff_vector;
+        computing_data_3.neuron_vector = num_neuron_vector;
+        computing_data_3.IC_vector = IC_vector_3;
+
+        threads_3.push_back(thread(workLoop_3,computing_data_3,ref(W_P_N_Vector),ref(W_P_P_Vector), ref(W_P_W_Vector),
+        ref(W_P_diff_Vector),ref(W_P_Acc_Vector),ref(W_P_RT_Vector), ref(W_P_Acc_Var_Vector),
+      ref(W_P_RT_Var_Vector)));
+    }
+
+    for (int i=0;i<threads_3.size();i++){
+        threads_3[i].join();
+    }
 
     //Outputting
     ofstream timeData("Data/Time.txt");
@@ -643,6 +797,7 @@ int main(){
     //         W_N_RT_Data_ult << W_N_RT_Vector[i][j] << endl;
     //     }
     // }
+        cout << "here1" << endl;
 
     //W vs N data
     vector<string> diff_names;
@@ -680,11 +835,17 @@ int main(){
                         + norm_names[n] + biased_names[b]+diff_names[d] +  ".txt";
                         string filename5 = "Data/" +W_N_base_name +"_RT"+ gain_names[g] + sep_names[s]
                         + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
+                        string filename6 = "Data/" +W_N_base_name +"_Acc_Var"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
+                        string filename7 = "Data/" +W_N_base_name +"_RT_Var"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
                         ofstream ToWrite1(filename1);
                         ofstream ToWrite2(filename2);
                         ofstream ToWrite3(filename3);
                         ofstream ToWrite4(filename4);
                         ofstream ToWrite5(filename5);
+                        ofstream ToWrite6(filename6);
+                        ofstream ToWrite7(filename7);
                         //int index = b*1 + n*2 + s*4 + g*8;
                         for (int i=0;i<W_N_N_Vector[index].size();i++){
                             ToWrite1 << W_N_N_Vector[index][i] << endl;
@@ -692,6 +853,8 @@ int main(){
                             ToWrite3 << W_N_diff_Vector[index][i] << endl;
                             ToWrite4 << W_N_Acc_Vector[index][i] << endl;
                             ToWrite5 << W_N_RT_Vector[index][i] << endl;
+                            ToWrite6 << W_N_Acc_Var_Vector[index][i] << endl;
+                            ToWrite7 << W_N_RT_Var_Vector[index][i] << endl;
                         }
                         index++;
                     }
@@ -700,6 +863,7 @@ int main(){
         }
     }
 
+        cout << "here" << endl;
 
 
     //W vs. Diff data
@@ -738,11 +902,17 @@ int main(){
                         + norm_names[n] + biased_names[b]+N_names[d] +  ".txt";
                         string filename5 = "Data/" +base_name +"_RT"+ gain_names[g] + sep_names[s]
                         + norm_names[n] + biased_names[b] + N_names[d] + ".txt";
+                        string filename6 = "Data/" +base_name +"_Acc_Var"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
+                        string filename7 = "Data/" +base_name +"_RT_Var"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
                         ofstream ToWrite1(filename1);
                         ofstream ToWrite2(filename2);
                         ofstream ToWrite3(filename3);
                         ofstream ToWrite4(filename4);
                         ofstream ToWrite5(filename5);
+                        ofstream ToWrite6(filename6);
+                        ofstream ToWrite7(filename7);
                         //int index = b*1 + n*2 + s*4 + g*8;
                         for (int i=0;i<W_Diff_N_Vector[index].size();i++){
                             ToWrite1 << W_Diff_N_Vector[index][i] << endl;
@@ -750,6 +920,62 @@ int main(){
                             ToWrite3 << W_Diff_diff_Vector[index][i] << endl;
                             ToWrite4 << W_Diff_Acc_Vector[index][i] << endl;
                             ToWrite5 << W_Diff_RT_Vector[index][i] << endl;
+                            ToWrite6 << W_Diff_Acc_Var_Vector[index][i] << endl;
+                            ToWrite7 << W_Diff_RT_Var_Vector[index][i] << endl;
+                        }
+                        index++;
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+    string base_name_2 = "W_P";
+
+    index=0;
+
+    for (int d=0;d<num_neuron_count;d++){
+        for (int g=0;g<gain_type;g++){
+            for (int s=0;s<sep_gain;s++){
+                for (int n=0;n<normalization;n++){
+                    for (int b=0;b<biased_IC;b++){
+                        string filename1 = "Data/" + base_name_2 +"_N"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b]+ diff_names[d] + ".txt";
+                        string filename2 = "Data/" +base_name_2 +"_W"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b]+diff_names[d] +  ".txt";
+                        string filename3 = "Data/" +base_name_2 +"_Diff"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b]+diff_names[d] +  ".txt";
+                        string filename4 = "Data/" +base_name_2 +"_Acc"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b]+diff_names[d] +  ".txt";
+                        string filename5 = "Data/" +base_name_2 +"_RT"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
+                        string filename6 = "Data/" +base_name_2 +"_Acc_Var"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
+                        string filename7 = "Data/" +base_name_2 +"_RT_Var"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
+                        string filename8 = "Data/" +base_name_2 +"_P"+ gain_names[g] + sep_names[s]
+                        + norm_names[n] + biased_names[b] + diff_names[d] + ".txt";
+                        ofstream ToWrite1(filename1);
+                        ofstream ToWrite2(filename2);
+                        ofstream ToWrite3(filename3);
+                        ofstream ToWrite4(filename4);
+                        ofstream ToWrite5(filename5);
+                        ofstream ToWrite6(filename6);
+                        ofstream ToWrite7(filename7);
+                        ofstream ToWrite8(filename8);
+                        //int index = b*1 + n*2 + s*4 + g*8;
+                        for (int i=0;i<W_P_N_Vector[index].size();i++){
+                            ToWrite1 << W_P_N_Vector[index][i] << endl;
+                            ToWrite2 << W_P_W_Vector[index][i] << endl;
+                            ToWrite3 << W_P_diff_Vector[index][i] << endl;
+                            ToWrite4 << W_P_Acc_Vector[index][i] << endl;
+                            ToWrite5 << W_P_RT_Vector[index][i] << endl;
+                            ToWrite6 << W_P_Acc_Var_Vector[index][i] << endl;
+                            ToWrite7 << W_P_RT_Var_Vector[index][i] << endl;
+                            ToWrite8 << W_P_P_Vector[index][i] << endl;
                         }
                         index++;
                     }
