@@ -159,7 +159,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
     vector<vector<double> >& W_P_Acc_Var_Vector,
         vector<vector<double> >& W_P_RT_Var_Vector){
 
-    int k =1;
+    int k =30;
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = (double)(j-1);
@@ -177,7 +177,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                             vector<double> variance_RT;
                             for (int l=1;l<=num_IC;l++){
                                 double IC = 0.1 + 0.8/num_IC * l;
-                                Network network_3D(custom_data.N,W,1,0.1,n);
+                                Network network_3D(custom_data.N,W,1,0.1,n,k);
                                 //network_3D.constructAllToAllNetwork();
                                 network_3D.constructSmallWorldNetwork(k,custom_data.p);
                                 network_3D.initializeWithChoice(b,IC,diff_ult);

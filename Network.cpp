@@ -39,6 +39,29 @@ Network::Network(int num_neurons, double w, double lambda, double time_step, int
     }
 }
 
+//small world
+Network::Network(int num_neurons, double w, double lambda, double time_step, int norm, int k){
+    this->num_neurons = num_neurons;
+
+    time = 0;
+    this->time_step = time_step;
+    RT = 0;
+    Acc = 0;
+
+    if (norm ==0){ //there is normalization
+        for(int i=0;i<num_neurons;i++){
+            Neuron* n = new Neuron(i,0,lambda,w/(k),0.5,0,time_step);
+            neuron_vector.push_back(n);
+        }
+    }
+    else{
+        for(int i=0;i<num_neurons;i++){
+            Neuron* n = new Neuron(i,0,lambda,w,0.5,0,time_step);
+            neuron_vector.push_back(n);
+        }
+    }
+}
+
 Network::~Network(){
     for (int i=0;i<num_neurons;i++){
         delete neuron_vector[i];
