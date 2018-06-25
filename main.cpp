@@ -6,7 +6,7 @@
 #include <mutex>
 
 
-#include "Simulation.h"
+#include "Network.h"
 
 using namespace std;
 
