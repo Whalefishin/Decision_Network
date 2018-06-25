@@ -187,7 +187,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                     Network network_3D(custom_data.N,W,1,0.1,n,k);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructSmallWorldNetwork(k,custom_data.p);
-                                    network_3D.initializeWithChoice(b,IC,diff_ult);
+                                    network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
                                         network_3D.updateWithChoice(s,g);
                                         if (k==custom_data.update_times-1){
@@ -254,7 +254,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
                                     Network network_3D(custom_data.N,W,1,0.1,n,custom_data.k);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructRegularNetwork(custom_data.k);
-                                    network_3D.initializeWithChoice(b,IC,diff_ult);
+                                    network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
                                         network_3D.updateWithChoice(s,g);
                                         if (k==custom_data.update_times-1){
@@ -322,7 +322,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                                     Network network_3D(custom_data.N,W,1,0.1,n,custom_data.k);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructRandomNetwork(custom_data.p);
-                                    network_3D.initializeWithChoice(b,IC,diff_ult);
+                                    network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
                                         network_3D.updateWithChoice(s,g);
                                         if (k==custom_data.update_times-1){
@@ -368,7 +368,7 @@ int main(){
     bool run_W_Diff = true;
     bool run_W_P = true;
     bool run_W_Regular = true;
-    bool run_W_Random = true; 
+    bool run_W_Random = true;
 
 
 
@@ -501,7 +501,7 @@ int main(){
             //double diff = (j-1)*0.1;
             Network network_3D(N,w/(N-1),1,0.1);
             network_3D.constructAllToAllNetwork();
-            network_3D.initializeFairIC(1.0,diff);
+            network_3D.initializeFairICNoDist(1.0,diff);
             //network_3D.initialize(0.5);
             for (int k = 0;k<update_times_3D;k++){
                 network_3D.updateIntegrateAll(&Neuron::sigmActiv);
@@ -547,7 +547,7 @@ int main(){
                 //double diff = (j-1)*0.1;
                 Network network_3D(N,w/(N-1),1,0.1);
                 network_3D.constructAllToAllNetwork();
-                network_3D.initializeFairIC(IC,diff);
+                network_3D.initializeFairICNoDist(IC,diff);
                 //network_3D.initialize(0.5);
                 for (int k = 0;k<update_times_3D_AVG_Fair;k++){
                     network_3D.update(&Neuron::sigmActiv);
@@ -575,6 +575,7 @@ int main(){
     int normalization = 2;
     int biased_IC = 2;
     int diff_count = 3;
+    int index = 0;
 
     int num_outer_loop_ult = 10;
     int num_inner_loop_ult = 11;
@@ -584,6 +585,36 @@ int main(){
     diff_vector.push_back(0.2);
     diff_vector.push_back(0.5);
     diff_vector.push_back(0.8);
+
+    int num_neuron_count = 3;
+    vector<double> num_neuron_vector;
+    num_neuron_vector.push_back(10);
+    num_neuron_vector.push_back(50);
+    num_neuron_vector.push_back(100);
+
+    //Writing W vs N data
+    vector<string> diff_names;
+    vector<string> gain_names;
+    vector<string> sep_names;
+    vector<string> norm_names;
+    vector<string> biased_names;
+    vector<string> dist_names;
+    diff_names.push_back("_Hard");
+    diff_names.push_back("_Medium");
+    diff_names.push_back("_Easy");
+    gain_names.push_back("_Sigm");
+    gain_names.push_back("_Binary");
+    sep_names.push_back("_IntAll");
+    sep_names.push_back("_Sep");
+    norm_names.push_back("_YesNorm");
+    norm_names.push_back("_NoNorm");
+    biased_names.push_back("_Fair");
+    biased_names.push_back("_Unfair");
+    dist_names.push_back("_NoDist");
+    dist_names.push_back("_YesDist");
+
+    string W_N_base_name = "W_N";
+    string base_name = "W_Diff";
 
     if (run_W_N){
         int num_Fair_IC_ult = 10;
@@ -614,7 +645,6 @@ int main(){
 
 
     //Parallel version
-        int index = 0;
         vector<thread> threads;
 
         Data computing_data;
@@ -643,28 +673,8 @@ int main(){
             threads[i].join();
         }
 
-        //Writing W vs N data
-        vector<string> diff_names;
-        vector<string> gain_names;
-        vector<string> sep_names;
-        vector<string> norm_names;
-        vector<string> biased_names;
-        vector<string> dist_names;
-        diff_names.push_back("_Hard");
-        diff_names.push_back("_Medium");
-        diff_names.push_back("_Easy");
-        gain_names.push_back("_Sigm");
-        gain_names.push_back("_Binary");
-        sep_names.push_back("_IntAll");
-        sep_names.push_back("_Sep");
-        norm_names.push_back("_YesNorm");
-        norm_names.push_back("_NoNorm");
-        biased_names.push_back("_Fair");
-        biased_names.push_back("_Unfair");
-        dist_names.push_back("_NoDist");
-        dist_names.push_back("_YesDist");
-        string W_N_base_name = "W_N";
 
+        //outputting data
         index=0;
 
         for (int d=0;d<diff_count;d++){
@@ -719,18 +729,11 @@ int main(){
 
 
     //Behold again, the ultimate version for W vs. Diff
-
     if (run_W_Diff){
-        int num_neuron_count = 3;
-
         int num_outer_loop_ult_2 = 10;
         int num_inner_loop_ult_2 = 11;
         int update_times_ult_2 = 1000;
         //double diff_ult = 0.5;
-        vector<double> num_neuron_vector;
-        num_neuron_vector.push_back(10);
-        num_neuron_vector.push_back(50);
-        num_neuron_vector.push_back(100);
 
         int num_Fair_IC_ult_2 = 10;
         int num_Unfair_IC_ult_2 = 100;
@@ -804,7 +807,6 @@ int main(){
         // norm_names_2.push_back("_NoNorm");
         // biased_names_2.push_back("_Fair");
         // biased_names_2.push_back("_Unfair");
-        string base_name = "W_Diff";
 
         index=0;
 
@@ -922,7 +924,7 @@ int main(){
             threads_3[i].join();
         }
 
-        
+
         //Data outputting
         string base_name_2 = "W_P";
 
@@ -1036,7 +1038,7 @@ int main(){
             computing_data_4.neuron_vector = num_neuron_vector;
             computing_data_4.IC_vector = IC_vector_4;
 
-            threads_4.push_back(thread(workLoop_4,computing_data_4,ref(W_Regular_N_Vector),ref(W_Regular_P_Vector), 
+            threads_4.push_back(thread(workLoop_4,computing_data_4,ref(W_Regular_N_Vector),ref(W_Regular_P_Vector),
             ref(W_Regular_K_Vector),ref(W_Regular_W_Vector),
             ref(W_Regular_diff_Vector),ref(W_Regular_Acc_Vector),ref(W_Regular_RT_Vector), ref(W_Regular_Acc_Var_Vector),
         ref(W_Regular_RT_Var_Vector)));
