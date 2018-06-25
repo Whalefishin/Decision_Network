@@ -64,6 +64,12 @@ bool contains(vector<T> list, T item){
   return false;
 }
 
+double fRand(double fMin, double fMax)
+{
+    double f = (double)rand() / RAND_MAX;
+    return fMin + f * (fMax - fMin);
+}
+
 
 // double absValue(double x){
 //   if (x < 0){

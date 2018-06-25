@@ -68,16 +68,50 @@ Network::~Network(){
     }
 }
 
-void Network::initializeWithChoice(int c, double IC, double diff){
-    if (c==0){ //fair
-        initializeFairIC(IC,diff);
+void Network::initializeWithChoice(int c1, int c2, double IC, double diff){
+    if (c2==0 && c1 ==0){ //fair, fixed input
+        initializeFairICNoDist(IC,diff);
     }
-    else{ //random
-        initializeRandomIC(diff);
+    else if (c2 ==0 && c1 == 1){ //fair, random input w/ expected value
+        initializeFairICYesDist(IC,diff);
+    }
+    else if (c2 == 1 && c1 ==0){ //random, fixed input
+        initializeRandomICNoDist(diff);
+    }
+    else{
+        initializeRandomICYesDist(diff);
     }
 }
 
-void Network::initializeFairIC(double IC, double diff){
+void Network::initializeFairICYesDist(double IC, double diff){
+    //Assume one winner, and diff is in [0,1]
+    //Assume no biase in IC
+    for (int i=0;i<num_neurons;i++){
+        float diff_rand = fRand(0,diff);
+        neuron_vector[i]->S = 1.0-diff_rand;
+        neuron_vector[i]->x = IC;
+        neuron_vector[i]->x_prev = neuron_vector[i]->x;
+    }
+    int winner_num = rand() % num_neurons;
+    neuron_vector[winner_num]->S = 1.0;
+    winners.push_back(neuron_vector[winner_num]);
+}
+
+void Network::initializeRandomICYesDist(double diff){
+    //Assume one winner, and diff is in [0,1]
+    //Assume no biase in IC
+    for (int i=0;i<num_neurons;i++){
+        float diff_rand = fRand(0,diff);
+        neuron_vector[i]->S = 1.0-diff_rand;
+        neuron_vector[i]->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        neuron_vector[i]->x_prev = neuron_vector[i]->x;
+    }
+    int winner_num = rand() % num_neurons;
+    neuron_vector[winner_num]->S = 1.0;
+    winners.push_back(neuron_vector[winner_num]);
+}
+
+void Network::initializeFairICNoDist(double IC, double diff){
     //Assume one winner, and diff is in [0,1]
     //Assume no biase in IC
     for (int i=0;i<num_neurons;i++){
@@ -90,7 +124,7 @@ void Network::initializeFairIC(double IC, double diff){
     winners.push_back(neuron_vector[winner_num]);
 }
 
-void Network::initializeRandomIC(double diff){
+void Network::initializeRandomICNoDist(double diff){
     //Assume one winner, and diff is in [0,1]
     //Assume no biase in IC
     for (int i=0;i<num_neurons;i++){

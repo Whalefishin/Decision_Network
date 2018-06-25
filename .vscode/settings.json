@@ -13,7 +13,14 @@
         "string": "cpp",
         "cstdlib": "cpp",
         "__bit_reference": "cpp",
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "ios": "cpp",
+        "xiosbase": "cpp",
+        "list": "cpp",
+        "xstring": "cpp",
+        "thread": "cpp",
+        "xmemory0": "cpp",
+        "ostream": "cpp"
     },
     "python.linting.pylintEnabled": false
 }
