@@ -42,7 +42,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = 0;
         if (j <=4){
-          W = (j-1)*0.25
+          W = (j-1)*0.25;
         }
         else{
           W = (double)(j-4);
@@ -110,7 +110,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = 0;
         if (j <=4){
-          W = (j-1)*0.25
+          W = (j-1)*0.25;
         }
         else{
           W = (double)(j-4);
@@ -182,7 +182,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = 0;
         if (j <=4){
-          W = (j-1)*0.25
+          W = (j-1)*0.25;
         }
         else{
           W = (double)(j-4);
@@ -255,7 +255,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = 0;
         if (j <=4){
-          W = (j-1)*0.25
+          W = (j-1)*0.25;
         }
         else{
           W = (double)(j-4);
@@ -329,7 +329,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = 0;
         if (j <=4){
-          W = (j-1)*0.25
+          W = (j-1)*0.25;
         }
         else{
           W = (double)(j-4);
@@ -397,8 +397,8 @@ int main(){
     bool run_W_N = true;
     bool run_W_Diff = true;
     bool run_W_P = true;
-    bool run_W_Regular = true;
-    bool run_W_Random = true;
+    bool run_W_Regular = false;
+    bool run_W_Random = false;
 
 
 
