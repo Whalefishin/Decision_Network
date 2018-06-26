@@ -40,7 +40,13 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
   ){
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
-        double W = (double)(j-1);
+        double W = 0;
+        if (j <=4){
+          W = (j-1)*0.25
+        }
+        else{
+          double W = (double)(j-4);
+        }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
             double diff_ult = custom_data.diff_vector[d];
@@ -48,7 +54,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                 for (int s=0;s<custom_data.sep_gain;s++){
                     for (int n=0;n<custom_data.normalization;n++){
                         for (int b=0;b<custom_data.biased_IC;b++){
-                            for (int dist=0;dist<2;d++){
+                            for (int dist=0;dist<2;dist++){
                                 int num_IC = custom_data.IC_vector[b];                                //double w = 1.0;
                                 double Acc_sum =0; //IC avg.
                                 double RT_sum = 0; //IC avg.
@@ -102,7 +108,13 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
     vector<vector<double> >& W_Diff_RT_Var_Vector){
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
-        double W = (double)(j-1);
+        double W = 0;
+        if (j <=4){
+          W = (j-1)*0.25
+        }
+        else{
+          double W = (double)(j-4);
+        }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
             //double diff_ult = custom_data.diff_vector[d];
@@ -168,7 +180,13 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
     int k =30;
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
-        double W = (double)(j-1);
+        double W = 0;
+        if (j <=4){
+          W = (j-1)*0.25
+        }
+        else{
+          double W = (double)(j-4);
+        }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
             double diff_ult = custom_data.diff_vector[d];
@@ -235,7 +253,13 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
 
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
-        double W = (double)(j-1);
+        double W = 0;
+        if (j <=4){
+          W = (j-1)*0.25
+        }
+        else{
+          double W = (double)(j-4);
+        }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
             double diff_ult = custom_data.diff_vector[d];
@@ -303,7 +327,13 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
 
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
-        double W = (double)(j-1);
+        double W = 0;
+        if (j <=4){
+          W = (j-1)*0.25
+        }
+        else{
+          double W = (double)(j-4);
+        }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
             double diff_ult = custom_data.diff_vector[d];
@@ -575,10 +605,11 @@ int main(){
     int normalization = 2;
     int biased_IC = 2;
     int diff_count = 3;
+    int distributed_input = 2;
     int index = 0;
 
     int num_outer_loop_ult = 10;
-    int num_inner_loop_ult = 11;
+    int num_inner_loop_ult = 14;
     int update_times_ult = 1000;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
@@ -631,7 +662,7 @@ int main(){
         vector<vector<double> > W_N_Acc_Var_Vector;
         vector<vector<double> > W_N_RT_Var_Vector;
 
-        for (int i=0;i<diff_count*gain_type*sep_gain*normalization*biased_IC;i++){
+        for (int i=0;i<diff_count*gain_type*sep_gain*normalization*biased_IC*distributed_input;i++){
             vector<double> toPush;
             W_N_N_Vector.push_back(toPush);
             W_N_W_Vector.push_back(toPush);
@@ -654,6 +685,7 @@ int main(){
             computing_data.N = N;
             computing_data.diff = 0;
             computing_data.p = 0;
+            computing_data.k = 0;
             computing_data.update_times = update_times_ult;
             computing_data.num_inner_loop_ult = num_inner_loop_ult;
             computing_data.diff_count = diff_count;
@@ -731,7 +763,7 @@ int main(){
     //Behold again, the ultimate version for W vs. Diff
     if (run_W_Diff){
         int num_outer_loop_ult_2 = 10;
-        int num_inner_loop_ult_2 = 11;
+        int num_inner_loop_ult_2 = 14;
         int update_times_ult_2 = 1000;
         //double diff_ult = 0.5;
 
@@ -749,7 +781,7 @@ int main(){
         vector<vector<double> > W_Diff_Acc_Var_Vector;
         vector<vector<double> > W_Diff_RT_Var_Vector;
 
-        for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC;i++){
+        for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC*distributed_input;i++){
             vector<double> toPush;
             W_Diff_N_Vector.push_back(toPush);
             W_Diff_W_Vector.push_back(toPush);
@@ -770,6 +802,7 @@ int main(){
             computing_data_2.N = 0;
             computing_data_2.diff = diff;
             computing_data_2.p = 0;
+            computing_data_2.k = 0;
             computing_data_2.update_times = update_times_ult_2;
             computing_data_2.num_inner_loop_ult = num_inner_loop_ult_2;
             computing_data_2.diff_count = diff_count;
@@ -864,8 +897,8 @@ int main(){
     //Behold one last time, the ultimate version for W vs. P
     if (run_W_P){
         int num_outer_loop_ult_3 = 11;
-        int num_inner_loop_ult_3 = 11;
-        int update_times_ult_3 = 1;
+        int num_inner_loop_ult_3 = 14;
+        int update_times_ult_3 = 1000;
 
         int num_Fair_IC_ult_3 = 10;
         int num_Unfair_IC_ult_3 = 100;
@@ -882,7 +915,7 @@ int main(){
         vector<vector<double> > W_P_Acc_Var_Vector;
         vector<vector<double> > W_P_RT_Var_Vector;
 
-        for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC;i++){
+        for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC*distributed_input;i++){
             vector<double> toPush;
             W_P_N_Vector.push_back(toPush);
             W_P_P_Vector.push_back(toPush);
@@ -901,9 +934,10 @@ int main(){
 
         for (int i=1;i<=num_outer_loop_ult_3;i++){
             double p = pow(2,i-num_outer_loop_ult_3);
-            computing_data_3.N = 10;
+            computing_data_3.N = 300;
             computing_data_3.diff = 0;
             computing_data_3.p = p;
+            computing_data_3.k = 0;
             computing_data_3.update_times = update_times_ult_3;
             computing_data_3.num_inner_loop_ult = num_inner_loop_ult_3;
             computing_data_3.diff_count = diff_count;
@@ -984,8 +1018,8 @@ int main(){
     //From Regular to All-to-All
     if (run_W_Regular){
         int num_outer_loop_ult_4 = 10;
-        int num_inner_loop_ult_4 = 11;
-        int update_times_ult_4 = 1;
+        int num_inner_loop_ult_4 = 14;
+        int update_times_ult_4 = 1000;
 
         int num_Fair_IC_ult_4 = 10;
         int num_Unfair_IC_ult_4 = 100;
@@ -1003,7 +1037,7 @@ int main(){
         vector<vector<double> > W_Regular_Acc_Var_Vector;
         vector<vector<double> > W_Regular_RT_Var_Vector;
 
-        for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC;i++){
+        for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC*distributed_input;i++){
             vector<double> toPush;
             W_Regular_N_Vector.push_back(toPush);
             W_Regular_P_Vector.push_back(toPush);
@@ -1110,9 +1144,9 @@ int main(){
 
     //From Random to All-to-All
     if (run_W_Random){
-        int num_outer_loop_ult_5 = 10;
+        int num_outer_loop_ult_5 = 11;
         int num_inner_loop_ult_5 = 11;
-        int update_times_ult_5 = 1;
+        int update_times_ult_5 = 1000;
 
         int num_Fair_IC_ult_5 = 10;
         int num_Unfair_IC_ult_5 = 100;
@@ -1130,7 +1164,7 @@ int main(){
         vector<vector<double> > W_Random_Acc_Var_Vector;
         vector<vector<double> > W_Random_RT_Var_Vector;
 
-        for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC;i++){
+        for (int i=0;i<num_neuron_count*gain_type*sep_gain*normalization*biased_IC*distributed_input;i++){
             vector<double> toPush;
             W_Random_N_Vector.push_back(toPush);
             W_Random_P_Vector.push_back(toPush);
@@ -1149,10 +1183,10 @@ int main(){
         Data computing_data_5;
 
         for (int i=1;i<=num_outer_loop_ult_5;i++){
-            int p = 0.1*i;
+            double p = pow(2,i-num_outer_loop_ult_5);
             computing_data_5.N = 300;
             computing_data_5.diff = 0;
-            computing_data_5.p = 0;
+            computing_data_5.p = p;
             computing_data_5.k = 0;
             computing_data_5.update_times = update_times_ult_5;
             computing_data_5.num_inner_loop_ult = num_inner_loop_ult_5;
