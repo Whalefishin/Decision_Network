@@ -10,6 +10,7 @@ Network::Network(int num_neurons, double w, double lambda, double time_step){
     this->time_step = time_step;
     RT = 0;
     Acc = 0;
+    Acc_mean = 0;
 
     for(int i=0;i<num_neurons;i++){
         Neuron* n = new Neuron(i,0,lambda,w,0.5,0,time_step);
@@ -24,6 +25,7 @@ Network::Network(int num_neurons, double w, double lambda, double time_step, int
     this->time_step = time_step;
     RT = 0;
     Acc = 0;
+    Acc_mean = 0;
 
     if (norm ==0){ //there is normalization
         for(int i=0;i<num_neurons;i++){
@@ -434,14 +436,19 @@ void Network::computeAccuracy(){
     }
 
     double max_loser_acc = -1*inf;
+    double mean_loser_acc = 0;
     for (int i=0;i<neuron_vector.size();i++){
         Neuron* loser = neuron_vector[i];
+        mean_loser_acc += loser->x;
         if (!contains(winners,loser) && loser->x > max_loser_acc){
             max_loser_acc = loser->x;
         }
     }
 
     Acc = max_winner_acc - max_loser_acc;
+
+    mean_loser_acc = mean_loser_acc/(neuron_vector.size()-winners.size());
+    Acc_mean = max_winner_acc - mean_loser_acc;
 }
 
 void Network::computeAccuracy(int k){
@@ -455,7 +462,7 @@ void Network::computeAccuracy(int k){
         }
     }
 
-    if (k == 1){
+    if (k == 0){
         double max_loser_acc = -1 * inf;
         for (int i=0;i<neuron_vector.size();i++){
             Neuron* loser = neuron_vector[i];
@@ -465,14 +472,14 @@ void Network::computeAccuracy(int k){
         }
         Acc = max_winner_acc - max_loser_acc;
     }
-    else if (k == 2){
-        double mean_loser_acc = -1*inf;
+    else if (k == 1){
+        double mean_loser_acc = 0;
         for (int i=0;i<neuron_vector.size();i++){
             Neuron* loser = neuron_vector[i];
             mean_loser_acc = mean_loser_acc + loser->x;
         }
-        mean_loser_acc = mean_loser_acc/(neuron_vector.size()-1);
-        Acc = max_winner_acc - mean_loser_acc;
+        mean_loser_acc = mean_loser_acc/(neuron_vector.size()-winners.size());
+        Acc_mean = max_winner_acc - mean_loser_acc;
     }
 
 }

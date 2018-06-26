@@ -34,6 +34,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
     vector<vector<double> >& W_N_W_Vector,
     vector<vector<double> >& W_N_diff_Vector,
     vector<vector<double> >& W_N_Acc_Vector,
+    vector<vector<double> >& W_N_AccMean_Vector,
     vector<vector<double> >& W_N_RT_Vector,
     vector<vector<double> >& W_N_Acc_Var_Vector,
     vector<vector<double> >& W_N_RT_Var_Vector
@@ -57,6 +58,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                             for (int dist=0;dist<2;dist++){
                                 int num_IC = custom_data.IC_vector[b];                                //double w = 1.0;
                                 double Acc_sum =0; //IC avg.
+                                double Acc_mean = 0;
                                 double RT_sum = 0; //IC avg.
                                 vector<double> variance_Acc;
                                 vector<double> variance_RT;
@@ -74,6 +76,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                                     variance_Acc.push_back(network_3D.Acc);
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                    Acc_mean += max(0,network_3D.Acc_mean);
                                     RT_sum += network_3D.RT;
                                 }
                                 //data collection
@@ -83,6 +86,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                                 W_N_W_Vector[index].push_back(W);
                                 W_N_diff_Vector[index].push_back(diff_ult);
                                 W_N_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                                W_N_AccMean_Vector[index].push_back(Acc_mean/num_IC);
                                 W_N_RT_Vector[index].push_back(RT_sum/num_IC);
                                 W_N_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
                                 W_N_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
@@ -103,6 +107,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
     vector<vector<double> >& W_Diff_W_Vector,
     vector<vector<double> >& W_Diff_diff_Vector,
     vector<vector<double> >& W_Diff_Acc_Vector,
+    vector<vector<double> >& W_Diff_AccMean_Vector,
     vector<vector<double> >& W_Diff_RT_Vector,
     vector<vector<double> >& W_Diff_Acc_Var_Vector,
     vector<vector<double> >& W_Diff_RT_Var_Vector){
@@ -126,6 +131,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                             for (int dist=0; dist<2;dist++){
                                 int num_IC = custom_data.IC_vector[b];                                //double w = 1.0;
                                 double Acc_sum =0; //IC avg.
+                                double Acc_mean = 0;
                                 double RT_sum = 0; //IC avg.
                                 vector<double> variance_Acc;
                                 vector<double> variance_RT;
@@ -143,6 +149,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                                     variance_Acc.push_back(network_3D.Acc);
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                    Acc_mean += max(0,network_3D.Acc_mean);
                                     RT_sum += network_3D.RT;
                                 }
                                 //data collection
@@ -152,6 +159,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                                 W_Diff_W_Vector[index].push_back(W);
                                 W_Diff_diff_Vector[index].push_back(custom_data.diff);
                                 W_Diff_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                                W_Diff_AccMean_Vector[index].push_back(Acc_mean/num_IC);
                                 W_Diff_RT_Vector[index].push_back(RT_sum/num_IC);
                                 W_Diff_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
                                 W_Diff_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
@@ -173,6 +181,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
     vector<vector<double> >& W_P_W_Vector,
     vector<vector<double> >& W_P_diff_Vector,
     vector<vector<double> >& W_P_Acc_Vector,
+    vector<vector<double> >& W_P_AccMean_Vector,
     vector<vector<double> >& W_P_RT_Vector,
     vector<vector<double> >& W_P_Acc_Var_Vector,
         vector<vector<double> >& W_P_RT_Var_Vector){
@@ -197,6 +206,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                             for (int dist=0;dist<2;dist++){
                                 int num_IC = custom_data.IC_vector[b];
                                 double Acc_sum =0; //IC avg.
+                                double Acc_Mean = 0;
                                 double RT_sum = 0; //IC avg.
                                 vector<double> variance_Acc;
                                 vector<double> variance_RT;
@@ -215,6 +225,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                     variance_Acc.push_back(network_3D.Acc);
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                    Acc_Mean += max(0,network_3D.Acc_mean);
                                     RT_sum += network_3D.RT;
                                 }
                                 //data collection
@@ -225,6 +236,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                 W_P_W_Vector[index].push_back(W);
                                 W_P_diff_Vector[index].push_back(diff_ult);
                                 W_P_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                                W_P_AccMean_Vector[index].push_back(Acc_Mean/num_IC);
                                 W_P_RT_Vector[index].push_back(RT_sum/num_IC);
                                 W_P_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
                                 W_P_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
@@ -247,6 +259,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
     vector<vector<double> >& W_Regular_W_Vector,
     vector<vector<double> >& W_Regular_diff_Vector,
     vector<vector<double> >& W_Regular_Acc_Vector,
+    vector<vector<double> >& W_Regular_AccMean_Vector,
     vector<vector<double> >& W_Regular_RT_Vector,
     vector<vector<double> >& W_Regular_Acc_Var_Vector,
         vector<vector<double> >& W_Regular_RT_Var_Vector){
@@ -270,6 +283,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
                             for (int dist=0;dist<2;dist++){
                                 int num_IC = custom_data.IC_vector[b];
                                 double Acc_sum =0; //IC avg.
+                                double Acc_Mean = 0;
                                 double RT_sum = 0; //IC avg.
                                 vector<double> variance_Acc;
                                 vector<double> variance_RT;
@@ -288,6 +302,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
                                     variance_Acc.push_back(network_3D.Acc);
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                    Acc_Mean += max(0,network_3D.Acc_mean);
                                     RT_sum += network_3D.RT;
                                 }
                                 //data collection
@@ -299,6 +314,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
                                 W_Regular_W_Vector[index].push_back(W);
                                 W_Regular_diff_Vector[index].push_back(diff_ult);
                                 W_Regular_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                                W_Regular_AccMean_Vector[index].push_back(Acc_Mean/num_IC);
                                 W_Regular_RT_Vector[index].push_back(RT_sum/num_IC);
                                 W_Regular_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
                                 W_Regular_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
@@ -321,6 +337,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
     vector<vector<double> >& W_Random_W_Vector,
     vector<vector<double> >& W_Random_diff_Vector,
     vector<vector<double> >& W_Random_Acc_Vector,
+    vector<vector<double> >& W_Random_AccMean_Vector,
     vector<vector<double> >& W_Random_RT_Vector,
     vector<vector<double> >& W_Random_Acc_Var_Vector,
         vector<vector<double> >& W_Random_RT_Var_Vector){
@@ -344,6 +361,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                             for (int dist=0;dist<2;dist++){
                                 int num_IC = custom_data.IC_vector[b];
                                 double Acc_sum =0; //IC avg.
+                                double Acc_mean =0;
                                 double RT_sum = 0; //IC avg.
                                 vector<double> variance_Acc;
                                 vector<double> variance_RT;
@@ -362,6 +380,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                                     variance_Acc.push_back(network_3D.Acc);
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                    Acc_mean += max(0,network_3D.Acc_mean);
                                     RT_sum += network_3D.RT;
                                 }
                                 //data collection
@@ -373,6 +392,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                                 W_Random_W_Vector[index].push_back(W);
                                 W_Random_diff_Vector[index].push_back(diff_ult);
                                 W_Random_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                                W_Random_AccMean_Vector[index].push_back(Acc_mean/num_IC);
                                 W_Random_RT_Vector[index].push_back(RT_sum/num_IC);
                                 W_Random_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
                                 W_Random_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
@@ -658,6 +678,7 @@ int main(){
         vector<vector<double> > W_N_W_Vector;
         vector<vector<double> > W_N_diff_Vector;
         vector<vector<double> > W_N_Acc_Vector;
+        vector<vector<double> > W_N_AccMean_Vector;
         vector<vector<double> > W_N_RT_Vector;
         vector<vector<double> > W_N_Acc_Var_Vector;
         vector<vector<double> > W_N_RT_Var_Vector;
@@ -668,6 +689,7 @@ int main(){
             W_N_W_Vector.push_back(toPush);
             W_N_diff_Vector.push_back(toPush);
             W_N_Acc_Vector.push_back(toPush);
+            W_N_AccMean_Vector.push_back(toPush);
             W_N_RT_Vector.push_back(toPush);
             W_N_Acc_Var_Vector.push_back(toPush);
             W_N_RT_Var_Vector.push_back(toPush);
@@ -697,7 +719,7 @@ int main(){
             computing_data.IC_vector = IC_vector;
 
             threads.push_back(thread(workLoop,computing_data,ref(W_N_N_Vector),ref(W_N_W_Vector),
-            ref(W_N_diff_Vector),ref(W_N_Acc_Vector),ref(W_N_RT_Vector), ref(W_N_Acc_Var_Vector),
+            ref(W_N_diff_Vector),ref(W_N_Acc_Vector),ref(W_N_AccMean_Vector),ref(W_N_RT_Vector), ref(W_N_Acc_Var_Vector),
         ref(W_N_RT_Var_Vector)));
         }
 
@@ -729,6 +751,8 @@ int main(){
                                 + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
                                 string filename7 = "Data/" +W_N_base_name +"_RT_Var"+ gain_names[g] + sep_names[s]
                                 + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                string filename8 = "Data/" +W_N_base_name +"_AccMean"+ gain_names[g] + sep_names[s]
+                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -736,6 +760,7 @@ int main(){
                                 ofstream ToWrite5(filename5);
                                 ofstream ToWrite6(filename6);
                                 ofstream ToWrite7(filename7);
+                                ofstream ToWrite8(filename8);
                                 //int index = b*1 + n*2 + s*4 + g*8;
                                 for (int i=0;i<W_N_N_Vector[index].size();i++){
                                     ToWrite1 << W_N_N_Vector[index][i] << endl;
@@ -745,6 +770,7 @@ int main(){
                                     ToWrite5 << W_N_RT_Vector[index][i] << endl;
                                     ToWrite6 << W_N_Acc_Var_Vector[index][i] << endl;
                                     ToWrite7 << W_N_RT_Var_Vector[index][i] << endl;
+                                    ToWrite8 << W_N_AccMean_Vector[index][i] << endl;
                                 }
                                 index++;
                             }
@@ -777,6 +803,7 @@ int main(){
         vector<vector<double> > W_Diff_W_Vector;
         vector<vector<double> > W_Diff_diff_Vector;
         vector<vector<double> > W_Diff_Acc_Vector;
+        vector<vector<double> > W_Diff_AccMean_Vector;
         vector<vector<double> > W_Diff_RT_Vector;
         vector<vector<double> > W_Diff_Acc_Var_Vector;
         vector<vector<double> > W_Diff_RT_Var_Vector;
@@ -787,6 +814,7 @@ int main(){
             W_Diff_W_Vector.push_back(toPush);
             W_Diff_diff_Vector.push_back(toPush);
             W_Diff_Acc_Vector.push_back(toPush);
+            W_Diff_AccMean_Vector.push_back(toPush);
             W_Diff_RT_Vector.push_back(toPush);
             W_Diff_Acc_Var_Vector.push_back(toPush);
             W_Diff_RT_Var_Vector.push_back(toPush);
@@ -815,7 +843,7 @@ int main(){
             computing_data_2.IC_vector = IC_vector_2;
 
             threads_2.push_back(thread(workLoop_2,computing_data_2,ref(W_Diff_N_Vector),ref(W_Diff_W_Vector),
-            ref(W_Diff_diff_Vector),ref(W_Diff_Acc_Vector),ref(W_Diff_RT_Vector), ref(W_Diff_Acc_Var_Vector),
+            ref(W_Diff_diff_Vector),ref(W_Diff_Acc_Vector),ref(W_Diff_AccMean_Vector),ref(W_Diff_RT_Vector), ref(W_Diff_Acc_Var_Vector),
         ref(W_Diff_RT_Var_Vector)));
         }
 
@@ -863,6 +891,8 @@ int main(){
                                 + norm_names[n] + biased_names[b] + N_names[d] + dist_names[dist] + ".txt";
                                 string filename7 = "Data/" +base_name +"_RT_Var"+ gain_names[g] + sep_names[s]
                                 + norm_names[n] + biased_names[b] + N_names[d] + dist_names[dist] +  ".txt";
+                                string filename8 = "Data/" +base_name +"_AccMean"+ gain_names[g] + sep_names[s]
+                                + norm_names[n] + biased_names[b] + N_names[d] + dist_names[dist] +  ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -870,6 +900,7 @@ int main(){
                                 ofstream ToWrite5(filename5);
                                 ofstream ToWrite6(filename6);
                                 ofstream ToWrite7(filename7);
+                                ofstream ToWrite8(filename8);
                                 //int index = b*1 + n*2 + s*4 + g*8;
                                 for (int i=0;i<W_Diff_N_Vector[index].size();i++){
                                     ToWrite1 << W_Diff_N_Vector[index][i] << endl;
@@ -879,6 +910,7 @@ int main(){
                                     ToWrite5 << W_Diff_RT_Vector[index][i] << endl;
                                     ToWrite6 << W_Diff_Acc_Var_Vector[index][i] << endl;
                                     ToWrite7 << W_Diff_RT_Var_Vector[index][i] << endl;
+                                    ToWrite8 << W_Diff_AccMean_Vector[index][i] << endl;
                                 }
                                 index++;
                             }
@@ -911,6 +943,7 @@ int main(){
         vector<vector<double> > W_P_W_Vector;
         vector<vector<double> > W_P_diff_Vector;
         vector<vector<double> > W_P_Acc_Vector;
+        vector<vector<double> > W_P_AccMean_Vector;
         vector<vector<double> > W_P_RT_Vector;
         vector<vector<double> > W_P_Acc_Var_Vector;
         vector<vector<double> > W_P_RT_Var_Vector;
@@ -922,6 +955,7 @@ int main(){
             W_P_W_Vector.push_back(toPush);
             W_P_diff_Vector.push_back(toPush);
             W_P_Acc_Vector.push_back(toPush);
+            W_P_AccMean_Vector.push_back(toPush);
             W_P_RT_Vector.push_back(toPush);
             W_P_Acc_Var_Vector.push_back(toPush);
             W_P_RT_Var_Vector.push_back(toPush);
@@ -950,7 +984,7 @@ int main(){
             computing_data_3.IC_vector = IC_vector_3;
 
             threads_3.push_back(thread(workLoop_3,computing_data_3,ref(W_P_N_Vector),ref(W_P_P_Vector), ref(W_P_W_Vector),
-            ref(W_P_diff_Vector),ref(W_P_Acc_Vector),ref(W_P_RT_Vector), ref(W_P_Acc_Var_Vector),
+            ref(W_P_diff_Vector),ref(W_P_Acc_Vector),ref(W_P_AccMean_Vector),ref(W_P_RT_Vector), ref(W_P_Acc_Var_Vector),
         ref(W_P_RT_Var_Vector)));
         }
 
@@ -986,6 +1020,8 @@ int main(){
                                 + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
                                 string filename8 = "Data/" +base_name_2 +"_P"+ gain_names[g] + sep_names[s]
                                 + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                string filename9 = "Data/" +base_name_2 +"_AccMean"+ gain_names[g] + sep_names[s]
+                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -994,6 +1030,7 @@ int main(){
                                 ofstream ToWrite6(filename6);
                                 ofstream ToWrite7(filename7);
                                 ofstream ToWrite8(filename8);
+                                ofstream ToWrite9(filename9);
                                 //int index = b*1 + n*2 + s*4 + g*8;
                                 for (int i=0;i<W_P_N_Vector[index].size();i++){
                                     ToWrite1 << W_P_N_Vector[index][i] << endl;
@@ -1004,6 +1041,7 @@ int main(){
                                     ToWrite6 << W_P_Acc_Var_Vector[index][i] << endl;
                                     ToWrite7 << W_P_RT_Var_Vector[index][i] << endl;
                                     ToWrite8 << W_P_P_Vector[index][i] << endl;
+                                    ToWrite9 << W_P_AccMean_Vector[index][i] << endl;
                                 }
                                 index++;
                             }
@@ -1033,6 +1071,7 @@ int main(){
         vector<vector<double> > W_Regular_W_Vector;
         vector<vector<double> > W_Regular_diff_Vector;
         vector<vector<double> > W_Regular_Acc_Vector;
+        vector<vector<double> > W_Regular_AccMean_Vector;
         vector<vector<double> > W_Regular_RT_Vector;
         vector<vector<double> > W_Regular_Acc_Var_Vector;
         vector<vector<double> > W_Regular_RT_Var_Vector;
@@ -1045,6 +1084,7 @@ int main(){
             W_Regular_W_Vector.push_back(toPush);
             W_Regular_diff_Vector.push_back(toPush);
             W_Regular_Acc_Vector.push_back(toPush);
+            W_Regular_AccMean_Vector.push_back(toPush);
             W_Regular_RT_Vector.push_back(toPush);
             W_Regular_Acc_Var_Vector.push_back(toPush);
             W_Regular_RT_Var_Vector.push_back(toPush);
@@ -1074,7 +1114,7 @@ int main(){
 
             threads_4.push_back(thread(workLoop_4,computing_data_4,ref(W_Regular_N_Vector),ref(W_Regular_P_Vector),
             ref(W_Regular_K_Vector),ref(W_Regular_W_Vector),
-            ref(W_Regular_diff_Vector),ref(W_Regular_Acc_Vector),ref(W_Regular_RT_Vector), ref(W_Regular_Acc_Var_Vector),
+            ref(W_Regular_diff_Vector),ref(W_Regular_Acc_Vector),ref(W_Regular_AccMean_Vector),ref(W_Regular_RT_Vector), ref(W_Regular_Acc_Var_Vector),
         ref(W_Regular_RT_Var_Vector)));
         }
 
@@ -1111,6 +1151,8 @@ int main(){
                                 + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
                                 string filename9 = "Data/" +base_name_3 +"_K"+ gain_names[g] + sep_names[s]
                                 + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                string filename10 = "Data/" +base_name_3 +"_AccMean"+ gain_names[g] + sep_names[s]
+                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -1120,6 +1162,7 @@ int main(){
                                 ofstream ToWrite7(filename7);
                                 ofstream ToWrite8(filename8);
                                 ofstream ToWrite9(filename9);
+                                ofstream ToWrite10(filename10);
                                 //int index = b*1 + n*2 + s*4 + g*8;
                                 for (int i=0;i<W_Regular_N_Vector[index].size();i++){
                                     ToWrite1 << W_Regular_N_Vector[index][i] << endl;
@@ -1131,6 +1174,7 @@ int main(){
                                     ToWrite7 << W_Regular_RT_Var_Vector[index][i] << endl;
                                     ToWrite8 << W_Regular_P_Vector[index][i] << endl;
                                     ToWrite9 << W_Regular_K_Vector[index][i] << endl;
+                                    ToWrite10 << W_Regular_AccMean_Vector[index][i] << endl;
                                 }
                                 index++;
                             }
@@ -1160,6 +1204,7 @@ int main(){
         vector<vector<double> > W_Random_W_Vector;
         vector<vector<double> > W_Random_diff_Vector;
         vector<vector<double> > W_Random_Acc_Vector;
+        vector<vector<double> > W_Random_AccMean_Vector;
         vector<vector<double> > W_Random_RT_Vector;
         vector<vector<double> > W_Random_Acc_Var_Vector;
         vector<vector<double> > W_Random_RT_Var_Vector;
@@ -1172,6 +1217,7 @@ int main(){
             W_Random_W_Vector.push_back(toPush);
             W_Random_diff_Vector.push_back(toPush);
             W_Random_Acc_Vector.push_back(toPush);
+            W_Random_AccMean_Vector.push_back(toPush);
             W_Random_RT_Vector.push_back(toPush);
             W_Random_Acc_Var_Vector.push_back(toPush);
             W_Random_RT_Var_Vector.push_back(toPush);
@@ -1201,7 +1247,7 @@ int main(){
 
             threads_5.push_back(thread(workLoop_5,computing_data_5,ref(W_Random_N_Vector),ref(W_Random_P_Vector),
             ref(W_Random_K_Vector), ref(W_Random_W_Vector),
-            ref(W_Random_diff_Vector),ref(W_Random_Acc_Vector),ref(W_Random_RT_Vector), ref(W_Random_Acc_Var_Vector),
+            ref(W_Random_diff_Vector),ref(W_Random_Acc_Vector),ref(W_Random_AccMean_Vector),ref(W_Random_RT_Vector), ref(W_Random_Acc_Var_Vector),
         ref(W_Random_RT_Var_Vector)));
         }
 
@@ -1238,6 +1284,8 @@ int main(){
                                 + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
                                 string filename9 = "Data/" +base_name +"_K"+ gain_names[g] + sep_names[s]
                                 + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                string filename10 = "Data/" +base_name +"_AccMean"+ gain_names[g] + sep_names[s]
+                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -1247,6 +1295,7 @@ int main(){
                                 ofstream ToWrite7(filename7);
                                 ofstream ToWrite8(filename8);
                                 ofstream ToWrite9(filename9);
+                                ofstream ToWrite10(filename10);
                                 //int index = b*1 + n*2 + s*4 + g*8;
                                 for (int i=0;i<W_Random_N_Vector[index].size();i++){
                                     ToWrite1 << W_Random_N_Vector[index][i] << endl;
@@ -1258,6 +1307,7 @@ int main(){
                                     ToWrite7 << W_Random_RT_Var_Vector[index][i] << endl;
                                     ToWrite8 << W_Random_P_Vector[index][i] << endl;
                                     ToWrite9 << W_Random_K_Vector[index][i] << endl;
+                                    ToWrite10 << W_Random_AccMean_Vector[index][i] << endl;
                                 }
                                 index++;
                             }

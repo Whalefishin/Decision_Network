@@ -63,5 +63,6 @@ class Network{
 
     double RT; //reaction time
     double Acc; //Accuracy
+    double Acc_mean;
 
 };
