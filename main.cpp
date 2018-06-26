@@ -45,7 +45,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
           W = (j-1)*0.25
         }
         else{
-          double W = (double)(j-4);
+          W = (double)(j-4);
         }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
@@ -113,7 +113,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
           W = (j-1)*0.25
         }
         else{
-          double W = (double)(j-4);
+          W = (double)(j-4);
         }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
@@ -185,7 +185,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
           W = (j-1)*0.25
         }
         else{
-          double W = (double)(j-4);
+          W = (double)(j-4);
         }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
@@ -258,7 +258,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
           W = (j-1)*0.25
         }
         else{
-          double W = (double)(j-4);
+          W = (double)(j-4);
         }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
@@ -332,7 +332,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
           W = (j-1)*0.25
         }
         else{
-          double W = (double)(j-4);
+          W = (double)(j-4);
         }
         int index = 0;
         for (int d=0;d<custom_data.diff_count;d++){
