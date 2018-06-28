@@ -650,9 +650,9 @@ int main(){
     vector<string> norm_names;
     vector<string> biased_names;
     vector<string> dist_names;
-    diff_names.push_back("_Hard");
-    diff_names.push_back("_Medium");
     diff_names.push_back("_Easy");
+    diff_names.push_back("_Medium");
+    diff_names.push_back("_Hard");
     gain_names.push_back("_Sigm");
     gain_names.push_back("_Binary");
     sep_names.push_back("_IntAll");
@@ -738,21 +738,21 @@ int main(){
                         for (int b=0;b<biased_IC;b++){
                             for (int dist=0;dist<2;dist++){
                                 string filename1 = "Data/" + W_N_base_name +"_N"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+ diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+ dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename2 = "Data/" +W_N_base_name +"_W"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename3 = "Data/" +W_N_base_name +"_Diff"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename4 = "Data/" +W_N_base_name +"_Acc"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename5 = "Data/" +W_N_base_name +"_RT"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename6 = "Data/" +W_N_base_name +"_Acc_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename7 = "Data/" +W_N_base_name +"_RT_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename8 = "Data/" +W_N_base_name +"_AccMean"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -878,21 +878,21 @@ int main(){
                         for (int b=0;b<biased_IC;b++){
                             for (int dist=0;dist<2;dist++){
                                 string filename1 = "Data/" + base_name +"_N"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+ N_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+ dist_names[dist] + N_names[d] +  ".txt";
                                 string filename2 = "Data/" +base_name +"_W"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+N_names[d] + dist_names[dist] +   ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + N_names[d] +   ".txt";
                                 string filename3 = "Data/" +base_name +"_Diff"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+N_names[d] + dist_names[dist] +   ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + N_names[d] +   ".txt";
                                 string filename4 = "Data/" +base_name +"_Acc"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+N_names[d] + dist_names[dist] +   ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + N_names[d] +   ".txt";
                                 string filename5 = "Data/" +base_name +"_RT"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + N_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + N_names[d] +  ".txt";
                                 string filename6 = "Data/" +base_name +"_Acc_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + N_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + N_names[d] + ".txt";
                                 string filename7 = "Data/" +base_name +"_RT_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + N_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + N_names[d] +  ".txt";
                                 string filename8 = "Data/" +base_name +"_AccMean"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + N_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + N_names[d] +  ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -1005,23 +1005,23 @@ int main(){
                         for (int b=0;b<biased_IC;b++){
                             for (int dist=0;dist<2;dist++){
                                 string filename1 = "Data/" + base_name_2 +"_N"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+ diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b]+ dist_names[dist] + diff_names[d] + ".txt";
                                 string filename2 = "Data/" +base_name_2 +"_W"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename3 = "Data/" +base_name_2 +"_Diff"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename4 = "Data/" +base_name_2 +"_Acc"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename5 = "Data/" +base_name_2 +"_RT"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename6 = "Data/" +base_name_2 +"_Acc_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename7 = "Data/" +base_name_2 +"_RT_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename8 = "Data/" +base_name_2 +"_P"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename9 = "Data/" +base_name_2 +"_AccMean"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -1134,25 +1134,25 @@ int main(){
                         for (int b=0;b<biased_IC;b++){
                             for (int dist=0;dist<2;dist++){
                                 string filename1 = "Data/" + base_name_3 +"_N"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+ diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b]+ dist_names[dist] + diff_names[d] + ".txt";
                                 string filename2 = "Data/" +base_name_3 +"_W"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename3 = "Data/" +base_name_3 +"_Diff"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename4 = "Data/" +base_name_3 +"_Acc"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename5 = "Data/" +base_name_3 +"_RT"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename6 = "Data/" +base_name_3 +"_Acc_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename7 = "Data/" +base_name_3 +"_RT_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename8 = "Data/" +base_name_3 +"_P"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename9 = "Data/" +base_name_3 +"_K"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename10 = "Data/" +base_name_3 +"_AccMean"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -1267,25 +1267,25 @@ int main(){
                         for (int b=0;b<biased_IC;b++){
                             for (int dist=0;dist<2;dist++){
                                 string filename1 = "Data/" + base_name +"_N"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+ diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b]+ dist_names[dist] + diff_names[d] + ".txt";
                                 string filename2 = "Data/" +base_name +"_W"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename3 = "Data/" +base_name +"_Diff"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename4 = "Data/" +base_name +"_Acc"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b]+diff_names[d] + dist_names[dist] +  ".txt";
+                                + norm_names[n] + biased_names[b]+dist_names[dist] + diff_names[d] +  ".txt";
                                 string filename5 = "Data/" +base_name +"_RT"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename6 = "Data/" +base_name +"_Acc_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename7 = "Data/" +base_name +"_RT_Var"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename8 = "Data/" +base_name +"_P"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename9 = "Data/" +base_name +"_K"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 string filename10 = "Data/" +base_name +"_AccMean"+ gain_names[g] + sep_names[s]
-                                + norm_names[n] + biased_names[b] + diff_names[d] + dist_names[dist] + ".txt";
+                                + norm_names[n] + biased_names[b] + dist_names[dist] + diff_names[d] + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);

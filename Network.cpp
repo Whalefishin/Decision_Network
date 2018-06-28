@@ -90,7 +90,7 @@ void Network::initializeFairICYesDist(double IC, double diff){
     //Assume no biase in IC
     for (int i=0;i<num_neurons;i++){
         float diff_rand = fRand(0,diff);
-        neuron_vector[i]->S = 1.0-diff_rand;
+        neuron_vector[i]->S = diff_rand;
         neuron_vector[i]->x = IC;
         neuron_vector[i]->x_prev = neuron_vector[i]->x;
     }
@@ -104,7 +104,7 @@ void Network::initializeRandomICYesDist(double diff){
     //Assume no biase in IC
     for (int i=0;i<num_neurons;i++){
         float diff_rand = fRand(0,diff);
-        neuron_vector[i]->S = 1.0-diff_rand;
+        neuron_vector[i]->S = diff_rand;
         neuron_vector[i]->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
         neuron_vector[i]->x_prev = neuron_vector[i]->x;
     }
@@ -117,7 +117,7 @@ void Network::initializeFairICNoDist(double IC, double diff){
     //Assume one winner, and diff is in [0,1]
     //Assume no biase in IC
     for (int i=0;i<num_neurons;i++){
-        neuron_vector[i]->S = 1.0-diff;
+        neuron_vector[i]->S = diff;
         neuron_vector[i]->x = IC;
         neuron_vector[i]->x_prev = neuron_vector[i]->x;
     }
@@ -130,7 +130,7 @@ void Network::initializeRandomICNoDist(double diff){
     //Assume one winner, and diff is in [0,1]
     //Assume no biase in IC
     for (int i=0;i<num_neurons;i++){
-        neuron_vector[i]->S = 1.0-diff;
+        neuron_vector[i]->S = diff;
         neuron_vector[i]->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
         neuron_vector[i]->x_prev = neuron_vector[i]->x;
     }
