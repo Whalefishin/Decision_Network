@@ -212,7 +212,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
                                     double IC = 0.1 + 0.8/num_IC * l;
-                                    Network network_3D(custom_data.N,W,1,0.1,n,k);
+                                    Network network_3D(custom_data.N,W,1,0.01,n,k);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructSmallWorldNetwork(k,custom_data.p);
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
@@ -333,7 +333,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
 // Random to All-to-All W vs. P
 void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
   vector<vector<double> >& W_Random_P_Vector,
-  vector<vector<double> >& W_Regular_K_Vector,
+  vector<vector<double> >& W_Random_K_Vector,
     vector<vector<double> >& W_Random_W_Vector,
     vector<vector<double> >& W_Random_diff_Vector,
     vector<vector<double> >& W_Random_Acc_Vector,
@@ -367,7 +367,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
                                     double IC = 0.1 + 0.8/num_IC * l;
-                                    Network network_3D(custom_data.N,W,1,0.1,n,custom_data.k);
+                                    Network network_3D(custom_data.N,W,1,0.1,n,custom_data.p*custom_data.N);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructRandomNetwork(custom_data.p);
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
@@ -388,7 +388,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                                 mtx.lock();
                                 W_Random_N_Vector[index].push_back(custom_data.N);
                                 W_Random_P_Vector[index].push_back(custom_data.p);
-                                W_Regular_K_Vector[index].push_back(custom_data.k);
+                                W_Random_K_Vector[index].push_back(custom_data.k);
                                 W_Random_W_Vector[index].push_back(W);
                                 W_Random_diff_Vector[index].push_back(diff_ult);
                                 W_Random_Acc_Vector[index].push_back(Acc_sum/num_IC);
@@ -414,9 +414,9 @@ int main(){
 
     //Controls which runs we want to do.
 
-    bool run_W_N = true;
-    bool run_W_Diff = true;
-    bool run_W_P = true;
+    bool run_W_N = false;
+    bool run_W_Diff = false;
+    bool run_W_P = false;
     bool run_W_Regular = false;
     bool run_W_Random = false;
 
@@ -930,7 +930,7 @@ int main(){
     if (run_W_P){
         int num_outer_loop_ult_3 = 11;
         int num_inner_loop_ult_3 = 14;
-        int update_times_ult_3 = 1000;
+        int update_times_ult_3 = 10000;
 
         int num_Fair_IC_ult_3 = 10;
         int num_Unfair_IC_ult_3 = 100;
@@ -1055,7 +1055,7 @@ int main(){
 
     //From Regular to All-to-All
     if (run_W_Regular){
-        int num_outer_loop_ult_4 = 10;
+        int num_outer_loop_ult_4 = 15;
         int num_inner_loop_ult_4 = 14;
         int update_times_ult_4 = 1000;
 
@@ -1096,7 +1096,13 @@ int main(){
         Data computing_data_4;
 
         for (int i=1;i<=num_outer_loop_ult_4;i++){
-            int k = 30*i;
+            int k=0;
+            if (i <=5){
+              k = i*5;
+            }
+            else{
+              k = (i-5)*30;
+            }
             computing_data_4.N = 300;
             computing_data_4.diff = 0;
             computing_data_4.p = 0;
@@ -1188,9 +1194,9 @@ int main(){
 
     //From Random to All-to-All
     if (run_W_Random){
-        int num_outer_loop_ult_5 = 11;
-        int num_inner_loop_ult_5 = 11;
-        int update_times_ult_5 = 1000;
+        int num_outer_loop_ult_5 = 15;
+        int num_inner_loop_ult_5 = 14;
+        int update_times_ult_5 = 500;
 
         int num_Fair_IC_ult_5 = 10;
         int num_Unfair_IC_ult_5 = 100;
@@ -1229,7 +1235,15 @@ int main(){
         Data computing_data_5;
 
         for (int i=1;i<=num_outer_loop_ult_5;i++){
-            double p = pow(2,i-num_outer_loop_ult_5);
+            double p =0;
+            if (i<=5){
+                p = i*5/300;
+            }
+            else{
+                p = (i-5)*0.1;
+            }
+
+
             computing_data_5.N = 300;
             computing_data_5.diff = 0;
             computing_data_5.p = p;

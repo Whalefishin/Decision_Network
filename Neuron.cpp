@@ -16,8 +16,8 @@ double x_0, double t_0, double h){
 
     update_count =0;
     RT_sum = 0;
-    RT_threshold = 0.01;
-    mean_threshold = 0.005;
+    RT_threshold = 0.00001;
+    mean_threshold = 0.0000001;
     RT_history = 200;
     RT_collected = false;
     RT_Count = 0;

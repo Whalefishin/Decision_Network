@@ -439,7 +439,10 @@ void Network::computeAccuracy(){
     double mean_loser_acc = 0;
     for (int i=0;i<neuron_vector.size();i++){
         Neuron* loser = neuron_vector[i];
-        mean_loser_acc += loser->x;
+        //mean_loser_acc += loser->x;
+        if (!contains(winners,loser)){
+            mean_loser_acc += loser->x;
+        }
         if (!contains(winners,loser) && loser->x > max_loser_acc){
             max_loser_acc = loser->x;
         }
