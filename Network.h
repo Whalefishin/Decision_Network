@@ -18,7 +18,7 @@ class Network{
     public:
     Network(int num_neurons, double w, double lambda, double time_step);
     Network(int num_neurons, double w, double lambda, double time_step, int norm);
-    Network(int num_neurons, double w, double lambda, double time_step, int norm,int k);
+    Network(int num_neurons, double w, double lambda, double time_step, int norm,int k); // norm =0 is YesNorm, k is normalization factor
     ~Network();
 
     void insertUndirectedConnection(Neuron* n1, Neuron* n2);
@@ -48,6 +48,7 @@ class Network{
     void constructSmallWorldNetwork(int k, double p); //p is the rewiring prob.
     void constructSmallWorldNetworkAttacked(int k, double p, double attack_strengths, int choice);
     void constructAllToAllNetwork();
+    void constructAllToAllNetworkAttacked(double attack_strengths, int choice);
 
     double computeCharacteristicPathLength();
     double computeGlobalClusteringCoefficient();

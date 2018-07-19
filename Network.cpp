@@ -446,7 +446,60 @@ void Network::constructSmallWorldNetworkAttacked(int k, double p, double attack_
 }
 
 
+void Network::constructAllToAllNetworkAttacked(double attack_strengths, int choice){
 
+  //choice =0 -> attack winner
+  //choice =1 -> attack losers
+
+  constructAllToAllNetwork(); //first, contruct an normal sw network
+  if (choice ==2){
+    for (int i=0;i<num_neurons;i++){
+      Neuron* n = neuron_vector[i];
+      vector<Neuron*> neighbors = getNeighbors(n);
+      vector<int> toRemove; //collects all the edges that need to be removed.
+      for (int j=0;j<neighbors.size();j++){
+        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        if (r <=attack_strengths){ //this connection is to be removed
+          toRemove.push_back(neighbors[j]->number);
+        }
+      }
+      for (int k=0;k<toRemove.size();k++){
+        removeUndirectedConnection(i,toRemove[k]);
+      }
+    }
+  }
+  else if (choice ==1){
+      for (int i=1;i<num_neurons;i++){ //skip 0, which is the winner
+        Neuron* n = neuron_vector[i];
+        vector<Neuron*> neighbors = getNeighbors(n);
+        vector<int> toRemove; //collects all the edges that need to be removed.
+        for (int j=0;j<neighbors.size();j++){
+          if (neighbors[j]->number!=0){ //the winner's connections is not to be touched.
+            float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+            if (r <=attack_strengths){ //this connection is to be removed
+              toRemove.push_back(neighbors[j]->number);
+            }
+          }
+        }
+        for (int k=0;k<toRemove.size();k++){
+          removeUndirectedConnection(i,toRemove[k]);
+        }
+      }
+  }
+  else{
+      vector<int> toRemove;
+      for (int j=0;j<neuron_vector[0]->neighbors.size();j++){ //get winner's
+        float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        if (r <=attack_strengths){ //this connection is to be removed
+          toRemove.push_back(neuron_vector[0]->neighbors[j]->number);
+        }
+      }
+      for (int k=0;k<toRemove.size();k++){
+        removeUndirectedConnection(0,toRemove[k]);
+      }
+    }
+
+}
 
 
 void Network::constructAllToAllNetwork(){
