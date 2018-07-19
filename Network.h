@@ -46,6 +46,7 @@ class Network{
     void constructRegularNetwork(int k); //k is the mean degree, assumed to be even
     void constructRandomNetwork(double p); //p is the prob that any given possible edge exists
     void constructSmallWorldNetwork(int k, double p); //p is the rewiring prob.
+    void constructSmallWorldNetworkAttacked(int k, double p, double attack_strengths, int choice);
     void constructAllToAllNetwork();
 
     double computeCharacteristicPathLength();

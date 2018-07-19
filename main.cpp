@@ -24,9 +24,11 @@ struct Data{
     int sep_gain;
     int normalization;
     int biased_IC;
+    int attack_choice;
     vector<double> diff_vector;
     vector<double> neuron_vector;
     vector<int> IC_vector;
+    vector<double> attack_strengths_vector;
 };
 
 //WorkLoop for W vs. N
@@ -186,7 +188,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
     vector<vector<double> >& W_P_Acc_Var_Vector,
         vector<vector<double> >& W_P_RT_Var_Vector){
 
-    int k =30;
+    int k =15;
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = 0;
@@ -409,6 +411,90 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
 }
 
 
+
+// W vs. attack
+void workLoop_attack(Data custom_data, vector<vector<double> >& W_P_N_Vector,
+  vector<vector<double> >& W_P_P_Vector,
+    vector<vector<double> >& W_P_W_Vector,
+    vector<vector<double> >& W_P_diff_Vector,
+    vector<vector<double> >& W_P_Acc_Vector,
+    vector<vector<double> >& W_P_AccMean_Vector,
+    vector<vector<double> >& W_P_RT_Vector,
+    vector<vector<double> >& W_P_Acc_Var_Vector,
+        vector<vector<double> >& W_P_RT_Var_Vector){
+
+    int k =30;
+
+    for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
+        double W = 0;
+        if (j <=4){
+          W = (j-1)*0.25;
+        }
+        else{
+          W = (double)(j-4);
+        }
+        int index = 0;
+        for (int d=0;d<custom_data.diff_count;d++){
+            double diff_ult = custom_data.diff_vector[d];
+            for (int g=0;g<custom_data.gain_type;g++){
+                for (int s=0;s<custom_data.sep_gain;s++){
+                    for (int n=0;n<custom_data.normalization;n++){
+                        for (int b=0;b<custom_data.biased_IC;b++){
+                            for (int dist=0;dist<1;dist++){
+                              for (int a_c=0;a_c < custom_data.attack_choice;a_c++){
+                                for (int a=0;a<custom_data.attack_strengths_vector.size();a++){
+                                    double attack = custom_data.attack_strengths_vector[a];
+                                    int num_IC = custom_data.IC_vector[b];
+                                    double Acc_sum =0; //IC avg.
+                                    double Acc_Mean = 0;
+                                    double RT_sum = 0; //IC avg.
+                                    vector<double> variance_Acc;
+                                    vector<double> variance_RT;
+                                    for (int l=1;l<=num_IC;l++){
+                                        double IC = 0.1 + 0.8/num_IC * l;
+                                        Network network_3D(custom_data.N,W,1,0.01,n,k);
+                                        //network_3D.constructAllToAllNetwork();
+                                        network_3D.constructSmallWorldNetworkAttacked(k,custom_data.p,attack,a_c);
+                                        network_3D.initializeWithChoice(dist,b,IC,diff_ult);
+                                        for (int k = 0;k<custom_data.update_times;k++){
+                                            network_3D.updateWithChoice(s,g);
+                                            if (k==custom_data.update_times-1){
+                                                network_3D.computeAccuracy();
+                                            }
+                                        }
+                                        variance_Acc.push_back(network_3D.Acc);
+                                        variance_RT.push_back(network_3D.RT);
+                                        Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                                        Acc_Mean += max(0,network_3D.Acc_mean);
+                                        RT_sum += network_3D.RT;
+                                    }
+                                    //data collection
+                                    //int index = b*1 + n*2 + s*4 + g*8;
+                                    mtx.lock();
+                                    W_P_N_Vector[index].push_back(custom_data.N);
+                                    W_P_P_Vector[index].push_back(custom_data.p);
+                                    W_P_W_Vector[index].push_back(W);
+                                    W_P_diff_Vector[index].push_back(diff_ult);
+                                    W_P_Acc_Vector[index].push_back(Acc_sum/num_IC);
+                                    W_P_AccMean_Vector[index].push_back(Acc_Mean/num_IC);
+                                    W_P_RT_Vector[index].push_back(RT_sum/num_IC);
+                                    W_P_Acc_Var_Vector[index].push_back(standardDeviation(variance_Acc));
+                                    W_P_RT_Var_Vector[index].push_back(standardDeviation(variance_RT));
+                                    mtx.unlock();
+                            //update index out of the simulation loop
+                                    index++;
+                                }
+                              }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 int main(){
 
 
@@ -416,116 +502,149 @@ int main(){
 
     bool run_W_N = false;
     bool run_W_Diff = false;
-    bool run_W_P = false;
+    bool run_W_P = true;
     bool run_W_Regular = false;
     bool run_W_Random = false;
+    bool run_W_Attacked = false;
 
 
 
     //fixed random seed for consistency
     srand(6);
 
-    int single_Network_neurons = 50;
-    Network* network = new Network(single_Network_neurons,10,1,0.1,1);
 
-    Neuron* n1 = network->neuron_vector[0];
-    Neuron* n2 = network->neuron_vector[1];
-    Neuron* n3 = network->neuron_vector[2];
-    Neuron* n4 = network->neuron_vector[3];
-    Neuron* n5 = network->neuron_vector[4];
-    // n1->x = 0.1;
-    // n2->x = 0.1;
-    // n1->S = 0.35; //so n1 should be the winner.
-    // n2->S = 0.3;
+        int single_Network_neurons = 300;
+        double w = 2;
+        int k = 15;
+        double dt = 0.01;
+        int update_times = 0;
 
-    //network->constructRandomNetwork(0.5);
-    network->constructAllToAllNetwork();
-    //network->constructSmallWorldNetwork(single_Network_neurons/10,0.1);
-    //network->initializeWithChoice(0,0.5,0.5);
+        Network* network = new Network(single_Network_neurons,w,1,dt,1,k);
 
-    // for (int i =0;i<network->num_neurons;i++){
-    //     network->insertUndirectedConnection(0,i);
-    // }
+        Neuron* n1 = network->neuron_vector[0];
+        Neuron* n2 = network->neuron_vector[1];
+        Neuron* n3 = network->neuron_vector[2];
+        Neuron* n4 = network->neuron_vector[3];
+        Neuron* n5 = network->neuron_vector[4];
+        // n1->x = 0.1;
+        // n2->x = 0.1;
+        // n1->S = 0.35; //so n1 should be the winner.
+        // n2->S = 0.3;
 
-    for (int i=0;i<network->num_neurons;i++){
-        Neuron* n = network->neuron_vector[i];
-        //n->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-        //cout << n->x << endl;
-        n->x = 0.5;
-        n->x_prev = n->x;
-        n->S = 0.8;
-    }
+        double connection_prob = (double)k/single_Network_neurons;
+        //cout << connection_prob << endl;
+        //network->constructRandomNetwork(connection_prob);
+        //network->constructAllToAllNetwork();
+        network->constructSmallWorldNetwork(k,0.01);
+        //network->initializeWithChoice(0,0.5,0.5);
+        //network->constructRegularNetwork(k);
+        // for (int i =0;i<network->num_neurons;i++){
+        //     network->insertUndirectedConnection(0,i);
+        // }
 
-    //winner parameters
-    n1->S = 1.0;
-    network->winners.push_back(n1);
+        // for (int i=0;i<network->num_neurons;i++){
+        //     Neuron* n = network->neuron_vector[i];
+        //     //n->x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+        //     //cout << n->x << endl;
+        //     n->x = 0.5;
+        //     n->x_prev = n->x;
+        //     //double input = fRand(0,0.2);
+        //     double input = 0.2;
+        //     n->S = input;
+        // }
+        //network->initializeRandomICYesDist(0.2);
+        network->initializeFairICNoDist(0.5,0.8);
 
-    int update_times = 500;
-    for (int t=0;t<update_times;t++){
-        network->updateIntegrateAll(&Neuron::binaryActiv);
-        if (t == update_times-1){ //last loop, collect accuracy
-            network->computeAccuracy();
-        }
-    }
-
-    double xData = -1.0;
-    int index_w = 0;
-
-    for (int i=0;i<single_Network_neurons;i++){
-        Neuron* n = network->neuron_vector[i];
-        if (n->x > xData){
-            xData = n->x;
-            index_w = i;
-        }
-    }
-
-    cout << "winner index: " + to_string(index_w) << endl;
-
-    Neuron* n_winner = network->neuron_vector[index_w];
-
-
-
-    int** J = network->outputAdjacencyMtx();
-
-    cout << "RT: " + to_string(network->RT) << endl;
-    cout << "Accuracy: " + to_string(network->Acc) << endl;
-
-
-    //scaling data
-    vector<double> w_data;
-    vector<double> RT_data;
-    vector<double> Acc_data;
-
-    //scaling
-    int num_networks = 10;
-    int update_times_scaling = 0;
-    for (int i=0;i<num_networks;i++){
-        //initialize
-        double w = (double)i;
-        Network scaling_network(2,w,1,0.01);
-        scaling_network.constructAllToAllNetwork();
-        Neuron* n1 = scaling_network.neuron_vector[0];
-        Neuron* n2 = scaling_network.neuron_vector[1];
-        //Neuron* n3 = scaling_network.neuron_vector[2];
-        n1->x = 0.5;
-        n2->x = 0.5;
-        //n3->x = 0.5;
-        n1->S = 0.5; //so n1 should be the winner.
-        n2->S = 0.3;
-        //n3->S = 0.1;
-        scaling_network.winners.push_back(n1);
-        //simulate
-        for (int t=0;t<update_times_scaling;t++){
-            scaling_network.updateIntegrateAll(&Neuron::sigmActiv);
-            if (t==update_times_scaling-1){
-                scaling_network.computeAccuracy();
+        //winner parameters
+        // n1->S = 1.0;
+        // network->winners.push_back(n1);
+        for (int t=0;t<update_times;t++){
+            network->updateIntegrateAll(&Neuron::sigmActiv);
+            if (t == update_times-1){ //last loop, collect accuracy
+                network->computeAccuracy();
             }
         }
-        //collect
-        w_data.push_back(w);
-        RT_data.push_back(scaling_network.RT);
-        Acc_data.push_back(scaling_network.Acc);
-    }
+
+        double xData = -1.0;
+        int index_w = 0;
+
+        for (int i=0;i<single_Network_neurons;i++){
+            Neuron* n = network->neuron_vector[i];
+            if (n->x > xData){
+                xData = n->x;
+                index_w = i;
+            }
+        }
+
+        cout << "winner index: " + to_string(index_w) << endl;
+
+        Neuron* n_winner = network->neuron_vector[index_w];
+
+
+        int** J = network->outputAdjacencyMtx();
+
+        cout << "RT: " + to_string(network->RT) << endl;
+        cout << "Accuracy: " + to_string(network->Acc) << endl;
+        cout << "Mean Acc: " + to_string(network->Acc_mean) << endl;
+
+
+        for (int i=0;i<single_Network_neurons;i++){
+            Neuron* n = network->neuron_vector[i];
+            string name = "Data/x" + to_string(i+1) + ".txt";
+            ofstream xData(name);
+            for (int j=0;j<n->x_data.size();j++){
+                xData << n->x_data[j] << endl;
+            }
+        }
+
+
+        //scaling data
+            vector<double> w_data;
+            vector<double> RT_data;
+            vector<double> Acc_data;
+            vector<double> AccMean_data;
+            vector<double> p_data;
+
+            //scaling
+            int num_networks = 21;
+            int update_times_scaling = 10000;
+            int neuron_num_scaling = 300;
+            int num_IC_scaling = 10;
+
+            int norm_scaling = 1;
+
+
+            for (int i=0;i<num_networks;i++){
+                //initialize
+                double w = (double)1;
+                double p = pow(2,i*0.5);
+                double RT_sum = 0;
+                double Acc_sum =0;
+                double AccMean_sum =0;
+                for (int j=0;j<=num_IC_scaling;j++){
+                    double IC = 0.1 + 0.8/num_IC_scaling * j;
+                    Network scaling_network(neuron_num_scaling,w,1,0.01,norm_scaling);
+                    //scaling_network.constructAllToAllNetwork();
+                    scaling_network.constructSmallWorldNetwork(30,p);
+                    scaling_network.initializeFairICYesDist(IC,0.8);
+                    //simulate
+                    for (int t=0;t<update_times_scaling;t++){
+                        scaling_network.updateIntegrateAll(&Neuron::sigmActiv);
+                        if (t==update_times_scaling-1){
+                            scaling_network.computeAccuracy();
+                        }
+                    }
+                    RT_sum += scaling_network.RT;
+                    Acc_sum += max(0,scaling_network.Acc);
+                    AccMean_sum += max(0,scaling_network.Acc_mean);
+                }
+                //collect
+                w_data.push_back(w);
+                p_data.push_back(p);
+                RT_data.push_back(RT_sum/num_IC_scaling);
+                Acc_data.push_back(Acc_sum/num_IC_scaling);
+                AccMean_data.push_back(AccMean_sum/num_IC_scaling);
+            }
 
 
     //3D plots
@@ -930,7 +1049,7 @@ int main(){
     if (run_W_P){
         int num_outer_loop_ult_3 = 11;
         int num_inner_loop_ult_3 = 14;
-        int update_times_ult_3 = 10000;
+        int update_times_ult_3 = 20000;
 
         int num_Fair_IC_ult_3 = 10;
         int num_Unfair_IC_ult_3 = 100;
@@ -1334,13 +1453,203 @@ int main(){
 
 
 
-    //Outputting
+
+
+    //Network under attack!!!!!!
+    int gain_type_attack = 2;
+    int sep_gain_attack = 1;
+    int normalization_attack = 2;
+    int biased_IC_attack = 1;
+    int diff_count_attack = 3;
+    int distributed_input_attack = 1;
+    int attack_choice = 3;
+    int attack_strengths = 8;
+
+    //double diff_ult = 0.5;
+    vector<double> diff_vector_attack;
+    diff_vector_attack.push_back(0.2);
+    diff_vector_attack.push_back(0.5);
+    diff_vector_attack.push_back(0.8);
+
+    vector<double> attack_strengths_vector;
+    attack_strengths_vector.push_back(0.003);
+    attack_strengths_vector.push_back(0.01);
+    attack_strengths_vector.push_back(0.03);
+    for(int i=0;i<attack_strengths-3;i++){
+      attack_strengths_vector.push_back(0.05*pow(2,i));
+    }
+
+    //Writing W vs N data
+    vector<string> diff_names_attack;
+    vector<string> gain_names_attack;
+    vector<string> sep_names_attack;
+    vector<string> norm_names_attack;
+    vector<string> biased_names_attack;
+    vector<string> dist_names_attack;
+    vector<string> ac_names_attack;
+    diff_names_attack.push_back("_Easy");
+    diff_names_attack.push_back("_Medium");
+    diff_names_attack.push_back("_Hard");
+    gain_names_attack.push_back("_Sigm");
+    gain_names_attack.push_back("_Binary");
+    sep_names_attack.push_back("_IntAll");
+    norm_names_attack.push_back("_YesNorm");
+    norm_names_attack.push_back("_NoNorm");
+    biased_names_attack.push_back("_Fair");
+    dist_names_attack.push_back("_NoDist");
+    ac_names_attack.push_back("_AttackWinner");
+    ac_names_attack.push_back("_AttackLosers");
+    ac_names_attack.push_back("_AttackAll");
+
+
+    string base_name_attack = "W_Attacked";
+
+
+    if (run_W_Attacked){
+        int num_outer_loop_ult_attack = 11;
+        int num_inner_loop_ult_attack = 14;
+        int update_times_ult_attack = 10000;
+
+        int num_Fair_IC_ult_attack = 10;
+        int num_Unfair_IC_ult_attack = 100;
+        vector<int> IC_vector_attack;
+        IC_vector_attack.push_back(num_Fair_IC_ult_attack);
+
+        vector<vector<double> > W_Attacked_N_Vector;
+        vector<vector<double> > W_Attacked_P_Vector;
+        vector<vector<double> > W_Attacked_W_Vector;
+        vector<vector<double> > W_Attacked_diff_Vector;
+        vector<vector<double> > W_Attacked_Acc_Vector;
+        vector<vector<double> > W_Attacked_AccMean_Vector;
+        vector<vector<double> > W_Attacked_RT_Vector;
+        vector<vector<double> > W_Attacked_Acc_Var_Vector;
+        vector<vector<double> > W_Attacked_RT_Var_Vector;
+
+        for (int i=0;i<diff_count_attack*gain_type_attack*sep_gain_attack*normalization_attack
+          *biased_IC_attack*distributed_input_attack*attack_choice*attack_strengths;i++){
+            vector<double> toPush;
+            W_Attacked_N_Vector.push_back(toPush);
+            W_Attacked_P_Vector.push_back(toPush);
+            W_Attacked_W_Vector.push_back(toPush);
+            W_Attacked_diff_Vector.push_back(toPush);
+            W_Attacked_Acc_Vector.push_back(toPush);
+            W_Attacked_AccMean_Vector.push_back(toPush);
+            W_Attacked_RT_Vector.push_back(toPush);
+            W_Attacked_Acc_Var_Vector.push_back(toPush);
+            W_Attacked_RT_Var_Vector.push_back(toPush);
+        }
+
+        index = 0;
+        vector<thread> threads_attack;
+
+        Data computing_data_attack;
+
+        for (int i=1;i<=num_outer_loop_ult_attack;i++){
+            double p = pow(2,i-num_outer_loop_ult_attack);
+            computing_data_attack.N = 300;
+            computing_data_attack.diff = 0;
+            computing_data_attack.p = p;
+            computing_data_attack.k = 0;
+            computing_data_attack.update_times = update_times_ult_attack;
+            computing_data_attack.num_inner_loop_ult = num_inner_loop_ult_attack;
+            computing_data_attack.diff_count = diff_count_attack;
+            computing_data_attack.gain_type = gain_type_attack;
+            computing_data_attack.sep_gain = sep_gain_attack;
+            computing_data_attack.normalization = normalization_attack;
+            computing_data_attack.biased_IC = biased_IC_attack;
+            computing_data_attack.diff_vector = diff_vector_attack;
+            computing_data_attack.neuron_vector = num_neuron_vector;
+            computing_data_attack.IC_vector = IC_vector_attack;
+            computing_data_attack.attack_strengths_vector = attack_strengths_vector;
+            computing_data_attack.attack_choice = attack_choice;
+
+            threads_attack.push_back(thread(workLoop_attack,computing_data_attack,ref(W_Attacked_N_Vector),ref(W_Attacked_P_Vector), ref(W_Attacked_W_Vector),
+            ref(W_Attacked_diff_Vector),ref(W_Attacked_Acc_Vector),ref(W_Attacked_AccMean_Vector),ref(W_Attacked_RT_Vector), ref(W_Attacked_Acc_Var_Vector),
+        ref(W_Attacked_RT_Var_Vector)));
+        }
+
+        for (int i=0;i<threads_attack.size();i++){
+            threads_attack[i].join();
+        }
+
+
+        //Data outputting
+        string base_name_2 = "W_Attacked";
+
+        index=0;
+
+        cout << "outputting" << endl;
+
+        for (int d=0;d<diff_count_attack;d++){
+            for (int g=0;g<gain_type_attack;g++){
+                for (int s=0;s<sep_gain_attack;s++){
+                    for (int n=0;n<normalization_attack;n++){
+                        for (int b=0;b<biased_IC_attack;b++){
+                          for (int ac = 0;ac<attack_choice;ac++){
+                            for (int a=0;a<attack_strengths;a++){
+                              for (int dist=0;dist<1;dist++){
+                                  string attack_strength_name = to_string(attack_strengths_vector[a]);
+                                  attack_strength_name.erase ( attack_strength_name.find_last_not_of('0') + 1, std::string::npos );
+                                  string filename1 = "Data/" + base_name_2 +"_N"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b]+ dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name +  ".txt";
+                                  string filename2 = "Data/" +base_name_2 +"_W"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b]+dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name +  ".txt";
+                                  string filename3 = "Data/" +base_name_2 +"_Diff"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b]+dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name +  ".txt";
+                                  string filename4 = "Data/" +base_name_2 +"_Acc"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b]+dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name +  ".txt";
+                                  string filename5 = "Data/" +base_name_2 +"_RT"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b] + dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name + ".txt";
+                                  string filename6 = "Data/" +base_name_2 +"_Acc_Var"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b] + dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name + ".txt";
+                                  string filename7 = "Data/" +base_name_2 +"_RT_Var"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b] + dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name + ".txt";
+                                  string filename8 = "Data/" +base_name_2 +"_P"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b] + dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name + ".txt";
+                                  string filename9 = "Data/" +base_name_2 +"_AccMean"+ gain_names_attack[g] + sep_names_attack[s]
+                                  + norm_names_attack[n] + biased_names_attack[b] + dist_names_attack[dist] + diff_names_attack[d] + ac_names_attack[ac] + "_AttackStrength=" + attack_strength_name + ".txt";
+                                  ofstream ToWrite1(filename1);
+                                  ofstream ToWrite2(filename2);
+                                  ofstream ToWrite3(filename3);
+                                  ofstream ToWrite4(filename4);
+                                  ofstream ToWrite5(filename5);
+                                  ofstream ToWrite6(filename6);
+                                  ofstream ToWrite7(filename7);
+                                  ofstream ToWrite8(filename8);
+                                  ofstream ToWrite9(filename9);
+                                  //int index = b*1 + n*2 + s*4 + g*8;
+                                  for (int i=0;i<W_Attacked_N_Vector[index].size();i++){
+                                      ToWrite1 << W_Attacked_N_Vector[index][i] << endl;
+                                      ToWrite2 << W_Attacked_W_Vector[index][i] << endl;
+                                      ToWrite3 << W_Attacked_diff_Vector[index][i] << endl;
+                                      ToWrite4 << W_Attacked_Acc_Vector[index][i] << endl;
+                                      ToWrite5 << W_Attacked_RT_Vector[index][i] << endl;
+                                      ToWrite6 << W_Attacked_Acc_Var_Vector[index][i] << endl;
+                                      ToWrite7 << W_Attacked_RT_Var_Vector[index][i] << endl;
+                                      ToWrite8 << W_Attacked_P_Vector[index][i] << endl;
+                                      ToWrite9 << W_Attacked_AccMean_Vector[index][i] << endl;
+                                  }
+                                  //cout << index << endl;
+                                  index++;
+                              }
+                            }
+                          }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
     ofstream timeData("Data/Time.txt");
-    ofstream x1Data("Data/x1.txt");
-    ofstream x2Data("Data/x2.txt");
-    ofstream x3Data("Data/x3.txt");
-    ofstream x4Data("Data/x4.txt");
-    ofstream x5Data("Data/x5.txt");
+    // ofstream x1Data("Data/x1.txt");
+    // ofstream x2Data("Data/x2.txt");
+    // ofstream x3Data("Data/x3.txt");
+    // ofstream x4Data("Data/x4.txt");
+    // ofstream x5Data("Data/x5.txt");
     ofstream xWinnerData("Data/x_w.txt");
     ofstream JmtxData("Data/J.txt");
     ofstream singleNetworkParameters("Data/SingleNetworkParameters.txt");
@@ -1348,6 +1657,7 @@ int main(){
     ofstream wData("Data/w.txt");
     ofstream RTData("Data/RT.txt");
     ofstream AccData("Data/Acc.txt");
+    ofstream AccMeanData("Data/AccMean.txt");
 
     ofstream w_Data_3D("Data/3D_w.txt");
     ofstream N_Data_3D("Data/3D_N.txt");
@@ -1369,11 +1679,11 @@ int main(){
 
     for (int i=0;i<n1->t_data.size();i++){
         timeData << n1->t_data[i] << endl;
-        x1Data << n1->x_data[i] << endl;
-        x2Data << n2->x_data[i] << endl;
-        x3Data << n3->x_data[i] << endl;
-        x4Data << n4->x_data[i] << endl;
-        x5Data << n5->x_data[i] << endl;
+        // x1Data << n1->x_data[i] << endl;
+        // x2Data << n2->x_data[i] << endl;
+        // x3Data << n3->x_data[i] << endl;
+        // x4Data << n4->x_data[i] << endl;
+        // x5Data << n5->x_data[i] << endl;
         xWinnerData << n_winner->x_data[i] << endl;
     }
 
@@ -1381,6 +1691,7 @@ int main(){
         wData << w_data[i] << endl;
         RTData << RT_data[i] << endl;
         AccData << Acc_data[i] << endl;
+        AccMeanData << AccMean_data[i] << endl;
     }
 
     for (int i=0;i<N_Vector_3D.size();i++){
