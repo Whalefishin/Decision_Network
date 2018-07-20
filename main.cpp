@@ -535,9 +535,9 @@ void workLoop_attackA2A(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                     for (int l=1;l<=num_IC;l++){
                                         double IC = 0.1 + 0.8/num_IC * l;
                                         Network network_3D(custom_data.N,W,1,0.01,n);
-                                        cout << "before top" << endl;
+                                        //cout << "before top" << endl;
                                         network_3D.constructAllToAllNetworkAttacked(attack,a_c);
-                                        cout << "after top" << endl;
+                                        //cout << "after top" << endl;
                                         //network_3D.constructSmallWorldNetworkAttacked(k,custom_data.p,attack,a_c);
                                         network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                         for (int k = 0;k<custom_data.update_times;k++){
@@ -1753,9 +1753,9 @@ int main(){
 
     if (run_W_AttackedA2A){
         cout << "attack a2a" << endl;
-        int num_outer_loop_ult_attack = 1;
+        int num_outer_loop_ult_attack = 10;
         int num_inner_loop_ult_attack = 14;
-        int update_times_ult_attack = 1;
+        int update_times_ult_attack = 10000;
 
         int num_Fair_IC_ult_attack = 10;
         int num_Unfair_IC_ult_attack = 100;
@@ -1793,7 +1793,7 @@ int main(){
 
         for (int i=1;i<=num_outer_loop_ult_attack;i++){
             //double p = pow(2,i-num_outer_loop_ult_attack);
-            computing_data_attack.N = i*2;
+            computing_data_attack.N = i*10;
             computing_data_attack.diff = 0;
             computing_data_attack.p = 0;
             computing_data_attack.k = 0;
