@@ -16,9 +16,11 @@ class Neuron{
 
     void updateRK4(double (Neuron::*f)(double));
     void updateRK4(double (Neuron::*f)(double),int c); //parameter specifies which activiation fcn to use.
+    void updateEulerNoisy(double (Neuron::*f)(double));
     double computeRHS(double t, double x,double (Neuron::*f)(double));
 
     void updateRK4IntegrateAll(double (Neuron::*f)(double)); //difference is if gain fcn incoporates S, the evidence
+    void updateEulerNoisyIntegrateAll(double (Neuron::*f)(double));
     double computeRHSIntegrateAll(double t, double x, double (Neuron::*f)(double));
 
     double linearActiv(double x); //linear activation function
@@ -53,6 +55,8 @@ class Neuron{
     double prev_jump_peak;
     vector<double> d_history;
     double mean_threshold;
+
+    double x_threshold; //used for the update with noise, collect RT after any node reaches this.
 
     vector<double> x_data;
     vector<double> t_data;

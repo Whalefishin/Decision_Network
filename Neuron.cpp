@@ -17,13 +17,14 @@ double x_0, double t_0, double h){
     update_count =0;
     RT_sum = 0;
     RT_threshold = 0.00001;
-    mean_threshold = 0.0000001;
+    mean_threshold = 0.000000001;
     RT_history = 200;
     RT_collected = false;
     RT_Count = 0;
     jump_ratio = 10;
     jump_variation_allowance = 0.1;
     prev_jump_peak = 0;
+    x_threshold = 0.8;
 
     x_data.push_back(x);
     t_data.push_back(t);
@@ -105,8 +106,8 @@ void Neuron::updateRK4(double (Neuron::*f)(double)){
 
 
     //updating
-    t_prev = t;
-    x_prev = x;
+    // t_prev = t;
+    // x_prev = x;
     t += h;
     x += (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
 
@@ -157,8 +158,8 @@ void Neuron::updateRK4(double (Neuron::*f)(double), int c){
     }
 
     //updating
-    t_prev = t;
-    x_prev = x;
+    // t_prev = t; // do this before t is updated to the next step.
+    // x_prev = x;
     t += h;
     x += (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
 
@@ -220,10 +221,42 @@ void Neuron::updateRK4IntegrateAll(double (Neuron::*f)(double)){
     }
 
     //updating
-    t_prev = t;
-    x_prev = x;
+    // t_prev = t;
+    // x_prev = x;
     t += h;
     x += (k_1 + 2*k_2 + 2*k_3 + k_4)/6.0;
+
+    //recording
+    x_data.push_back(x);
+    t_data.push_back(t);
+}
+
+
+void Neuron::updateEulerNoisy(double (Neuron::*f)(double)){
+    update_count++;
+
+    double RHS = computeRHS(this->t,this->x,(f));
+
+    double noise = rand_normal(0,sqrt(h));
+
+    t += h;
+    x = x + RHS + noise;
+
+    //recording
+    x_data.push_back(x);
+    t_data.push_back(t);
+}
+
+
+void Neuron::updateEulerNoisyIntegrateAll(double (Neuron::*f)(double)){
+    update_count++;
+
+    double RHS = computeRHSIntegrateAll(this->t,this->x,(f));
+
+    double noise = rand_normal(0,sqrt(h));
+
+    t += h;
+    x = x + RHS + noise;
 
     //recording
     x_data.push_back(x);

@@ -147,6 +147,38 @@ void Network::update(double (Neuron::*f)(double)){
     time += time_step;
     bool RT_achieved = true;
 
+
+    //old RT computation
+    // for (int i =0; i<num_neurons;i++){
+    //     Neuron* toUpdate = neuron_vector[i];
+    //     toUpdate->updateRK4(f);
+    //     // if (toUpdate->update_count > toUpdate->RT_history){
+    //     //     if (toUpdate->RT_sum > toUpdate->RT_threshold){ //not yet RT
+    //     //         RT_achieved = false;
+    //     //     }
+    //     // }
+    //     // else{
+    //     //     RT_achieved = false;
+    //     // }
+    //     if (toUpdate->RT_Count < toUpdate->RT_history){
+    //         RT_achieved = false;
+    //     }
+    // }
+    //
+    // if (RT==0){ //this part sets the RT should it be achieved.
+    //     if (RT_achieved){
+    //         for (int i=0;i<num_neurons;i++){
+    //             Neuron* toUpdate = neuron_vector[i];
+    //             toUpdate->RT_collected = true;
+    //         }
+    //         RT = time;
+    //     }
+    // }
+
+    //new RT computation
+    Neuron* max;
+    double x_max = 0;
+
     for (int i =0; i<num_neurons;i++){
         Neuron* toUpdate = neuron_vector[i];
         toUpdate->updateRK4(f);
@@ -158,10 +190,19 @@ void Network::update(double (Neuron::*f)(double)){
         // else{
         //     RT_achieved = false;
         // }
-        if (toUpdate->RT_Count < toUpdate->RT_history){
-            RT_achieved = false;
+        // if (toUpdate->RT_Count < toUpdate->RT_history){
+        //     RT_achieved = false;
+        // }
+        if (x_max < toUpdate->x){
+          x_max = toUpdate->x;
+          max = toUpdate;
         }
     }
+
+    if (max->RT_Count < max->RT_history){
+      RT_achieved = false;
+    }
+
 
     if (RT==0){ //this part sets the RT should it be achieved.
         if (RT_achieved){
@@ -185,9 +226,13 @@ void Network::update(double (Neuron::*f)(double), int c){
     time += time_step;
     bool RT_achieved = true;
 
+    //new RT computation
+    Neuron* max;
+    double x_max = 0;
+
     for (int i =0; i<num_neurons;i++){
         Neuron* toUpdate = neuron_vector[i];
-        toUpdate->updateRK4(f,c);
+        toUpdate->updateRK4(f);
         // if (toUpdate->update_count > toUpdate->RT_history){
         //     if (toUpdate->RT_sum > toUpdate->RT_threshold){ //not yet RT
         //         RT_achieved = false;
@@ -196,9 +241,17 @@ void Network::update(double (Neuron::*f)(double), int c){
         // else{
         //     RT_achieved = false;
         // }
-        if (toUpdate->RT_Count < toUpdate->RT_history){
-            RT_achieved = false;
+        // if (toUpdate->RT_Count < toUpdate->RT_history){
+        //     RT_achieved = false;
+        // }
+        if (x_max < toUpdate->x){
+          x_max = toUpdate->x;
+          max = toUpdate;
         }
+    }
+
+    if (max->RT_Count < max->RT_history){
+      RT_achieved = false;
     }
 
     if (RT==0){ //this part sets the RT should it be achieved.
@@ -223,12 +276,33 @@ void Network::updateIntegrateAll(double (Neuron::*f)(double)){
     time += time_step;
     bool RT_achieved = true;
 
+    // for (int i =0; i<num_neurons;i++){
+    //     Neuron* toUpdate = neuron_vector[i];
+    //     toUpdate->updateRK4IntegrateAll(f);
+    //     if (toUpdate->RT_Count < toUpdate->RT_history){
+    //         RT_achieved = false;
+    //     }
+    // }
+
+    //new RT computation
+    Neuron* max;
+    double x_max = 0;
+
     for (int i =0; i<num_neurons;i++){
         Neuron* toUpdate = neuron_vector[i];
         toUpdate->updateRK4IntegrateAll(f);
-        if (toUpdate->RT_Count < toUpdate->RT_history){
-            RT_achieved = false;
-        }
+    }
+
+    for (int i =0; i<num_neurons;i++){
+        Neuron* toUpdate = neuron_vector[i];
+      if (x_max < toUpdate->x){
+        x_max = toUpdate->x;
+        max = toUpdate;
+      }
+    }
+
+    if (max->RT_Count < max->RT_history){
+      RT_achieved = false;
     }
 
     if (RT==0){ //this part sets the RT should it be achieved.
@@ -263,6 +337,74 @@ void Network::updateWithChoice(int c, int g){
         update(&Neuron::binaryActiv);
     }
 }
+
+
+void Network::updateNoisy(double (Neuron::*f)(double)){
+
+  if (RT!=0){ //decision is already made
+    return;
+  }
+
+  time += time_step;
+
+  for (int i =0; i<num_neurons;i++){
+      Neuron* toUpdate = neuron_vector[i];
+      toUpdate->updateEulerNoisy(f);
+      if (toUpdate->x > toUpdate->x_threshold){
+        RT = time;
+      }
+  }
+
+  //after updating everyone, renew the history
+  for (int i=0;i<num_neurons;i++){
+      Neuron* toUpdate = neuron_vector[i];
+      toUpdate->t_prev = toUpdate->t;
+      toUpdate->x_prev = toUpdate->x;
+  }
+}
+
+
+void Network::updateNoisyIntegrateAll(double (Neuron::*f)(double)){
+
+    if (RT!=0){ //decision is already made
+      return;
+    }
+
+    time += time_step;
+
+    for (int i =0; i<num_neurons;i++){
+        Neuron* toUpdate = neuron_vector[i];
+        toUpdate->updateEulerNoisyIntegrateAll(f);
+        if (toUpdate->x > toUpdate->x_threshold){
+          RT = time;
+        }
+    }
+
+    //after updating everyone, renew the history
+    for (int i=0;i<num_neurons;i++){
+        Neuron* toUpdate = neuron_vector[i];
+        toUpdate->t_prev = toUpdate->t;
+        toUpdate->x_prev = toUpdate->x;
+    }
+}
+
+
+void Network::updateNoisyWithChoice(int c, int g){
+    if (c==0 && g ==0){
+        updateNoisyIntegrateAll(&Neuron::sigmActiv);
+    }
+    else if (c==0 && g==1){
+        updateNoisyIntegrateAll(&Neuron::binaryActiv);
+    }
+    else if (c==1 && g==0){
+        updateNoisy(&Neuron::sigmActiv);
+    }
+    else{
+        updateNoisy(&Neuron::binaryActiv);
+    }
+}
+
+
 
 void Network::insertUndirectedConnection(Neuron* n1, Neuron* n2){
     if (contains(n1->neighbors,n2)){
