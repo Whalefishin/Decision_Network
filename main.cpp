@@ -594,7 +594,7 @@ void workLoop_NoiseSW(Data custom_data, vector<vector<double> >& N_Vector,
     vector<vector<double> >& Acc_Var_Vector,
         vector<vector<double> >& RT_Var_Vector){
 
-    int k =2;
+    int k =15;
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = 0;
@@ -605,6 +605,7 @@ void workLoop_NoiseSW(Data custom_data, vector<vector<double> >& N_Vector,
           W = (double)(j-4);
         }
         int index = 0;
+        //cout << W << endl;
         for (int d=0;d<custom_data.diff_count;d++){
             double diff_ult = custom_data.diff_vector[d];
             for (int g=0;g<custom_data.gain_type;g++){
@@ -621,8 +622,8 @@ void workLoop_NoiseSW(Data custom_data, vector<vector<double> >& N_Vector,
                                 vector<double> variance_Acc;
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
-                                    double IC = 0.1 + 0.8/num_IC * l;
-                                    //double IC = 0.1 + 0.8/num_IC*10 * ((l%10)+1);
+                                    //double IC = 0.1 + 0.8/num_IC * l;
+                                    double IC = 0.1 + 0.8/num_IC*10 * ((l%10)+1);
                                     Network network_3D(custom_data.N,W,1,0.01,n,k);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructSmallWorldNetwork(k,custom_data.p);
@@ -678,7 +679,7 @@ int main(){
     bool run_W_Random = false;
     bool run_W_Attacked = false;
     bool run_W_AttackedA2A = false;
-    bool run_W_NoiseSW = false;
+    bool run_W_NoiseSW = true;
 
 
 
@@ -690,7 +691,7 @@ int main(){
         double w = 1;
         int k = 15;
         double dt = 0.01;
-        int update_times = 10000;
+        int update_times = 0;
 
         Network* network = new Network(single_Network_neurons,w,1,dt,1,k);
 
@@ -1964,7 +1965,7 @@ int main(){
 
         int num_outer_loop_local = 11;
         int num_inner_loop_local = 14;
-        int update_times_local = 1;
+        int update_times_local = 10000;
         //double diff_ult = 0.5;
         vector<double> diff_vector_local;
         diff_vector_local.push_back(0.2);
@@ -1973,7 +1974,7 @@ int main(){
 
         vector<double> noise_strength_vector;
         for(int i=0;i<noise_strength_count;i++){
-          double strength = 1.0/32.0 * pow(2,i);
+          double strength = 1.0/128.0 * pow(2,i);
           noise_strength_vector.push_back(strength);
         }
 
@@ -2006,7 +2007,7 @@ int main(){
 
         string base_name_local = "W_NoiseSW";
 
-        int num_Fair_IC_local = 10;
+        int num_Fair_IC_local = 100;
         int num_Unfair_local = 100;
         vector<int> IC_vector_local;
         IC_vector_local.push_back(num_Fair_IC_local);
@@ -2043,7 +2044,7 @@ int main(){
 
         for (int i=1;i<=num_outer_loop_local;i++){
             double p = pow(2,i-num_outer_loop_local);
-            computing_data_local.N = 10;
+            computing_data_local.N = 300;
             computing_data_local.diff = 0;
             computing_data_local.p = p;
             computing_data_local.k = 0;
@@ -2057,6 +2058,7 @@ int main(){
             computing_data_local.diff_vector = diff_vector_local;
             computing_data_local.neuron_vector = num_neuron_vector_local;
             computing_data_local.IC_vector = IC_vector_local;
+            computing_data_local.noise_strength_vector = noise_strength_vector;
 
             threads_local.push_back(thread(workLoop_NoiseSW,computing_data_local,ref(N_Vector),ref(P_Vector), ref(W_Vector),
             ref(diff_Vector),ref(Acc_Vector),ref(AccMean_Vector),ref(RT_Vector), ref(Acc_Var_Vector),
