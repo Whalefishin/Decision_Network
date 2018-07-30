@@ -20,7 +20,8 @@
         "xstring": "cpp",
         "thread": "cpp",
         "xmemory0": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "__locale": "cpp"
     },
     "python.linting.pylintEnabled": false
 }

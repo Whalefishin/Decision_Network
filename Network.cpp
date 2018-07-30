@@ -341,18 +341,20 @@ void Network::updateWithChoice(int c, int g){
 
 void Network::updateNoisy(double (Neuron::*f)(double), double noise){
 
-  if (RT!=0){ //decision is already made
-    return;
-  }
+//   if (RT!=0){ //decision is already made
+//     return;
+//   }
 
   time += time_step;
 
   for (int i =0; i<num_neurons;i++){
       Neuron* toUpdate = neuron_vector[i];
       toUpdate->updateEulerNoisy(f, noise);
-      if (toUpdate->x > toUpdate->x_threshold){
-        RT = time;
-      }
+        if (RT==0){
+            if (toUpdate->x > toUpdate->x_threshold){
+                RT = time;
+            }
+        }
   }
 
   //after updating everyone, renew the history
@@ -366,17 +368,19 @@ void Network::updateNoisy(double (Neuron::*f)(double), double noise){
 
 void Network::updateNoisyIntegrateAll(double (Neuron::*f)(double), double noise){
 
-    if (RT!=0){ //decision is already made
-      return;
-    }
+    // if (RT!=0){ //decision is already made
+    //   return;
+    // }
 
     time += time_step;
 
     for (int i =0; i<num_neurons;i++){
         Neuron* toUpdate = neuron_vector[i];
         toUpdate->updateEulerNoisyIntegrateAll(f, noise);
-        if (toUpdate->x > toUpdate->x_threshold){
-          RT = time;
+        if (RT==0){
+            if (toUpdate->x > toUpdate->x_threshold){
+                RT = time;
+            }
         }
     }
 
