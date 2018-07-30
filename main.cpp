@@ -689,8 +689,8 @@ int main(){
         int single_Network_neurons = 300;
         double w = 1;
         int k = 15;
-        double dt = 0.01;
-        int update_times = 10000;
+        double dt = 0.001;
+        int update_times = 100000;
 
         Network* network = new Network(single_Network_neurons,w,1,dt,1,k);
 
