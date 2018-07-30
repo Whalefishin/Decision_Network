@@ -339,7 +339,7 @@ void Network::updateWithChoice(int c, int g){
 }
 
 
-void Network::updateNoisy(double (Neuron::*f)(double)){
+void Network::updateNoisy(double (Neuron::*f)(double), double noise){
 
   if (RT!=0){ //decision is already made
     return;
@@ -349,7 +349,7 @@ void Network::updateNoisy(double (Neuron::*f)(double)){
 
   for (int i =0; i<num_neurons;i++){
       Neuron* toUpdate = neuron_vector[i];
-      toUpdate->updateEulerNoisy(f);
+      toUpdate->updateEulerNoisy(f, noise);
       if (toUpdate->x > toUpdate->x_threshold){
         RT = time;
       }
@@ -364,7 +364,7 @@ void Network::updateNoisy(double (Neuron::*f)(double)){
 }
 
 
-void Network::updateNoisyIntegrateAll(double (Neuron::*f)(double)){
+void Network::updateNoisyIntegrateAll(double (Neuron::*f)(double), double noise){
 
     if (RT!=0){ //decision is already made
       return;
@@ -374,7 +374,7 @@ void Network::updateNoisyIntegrateAll(double (Neuron::*f)(double)){
 
     for (int i =0; i<num_neurons;i++){
         Neuron* toUpdate = neuron_vector[i];
-        toUpdate->updateEulerNoisyIntegrateAll(f);
+        toUpdate->updateEulerNoisyIntegrateAll(f, noise);
         if (toUpdate->x > toUpdate->x_threshold){
           RT = time;
         }
@@ -389,18 +389,18 @@ void Network::updateNoisyIntegrateAll(double (Neuron::*f)(double)){
 }
 
 
-void Network::updateNoisyWithChoice(int c, int g){
+void Network::updateNoisyWithChoice(int c, int g, double noise){
     if (c==0 && g ==0){
-        updateNoisyIntegrateAll(&Neuron::sigmActiv);
+        updateNoisyIntegrateAll(&Neuron::sigmActiv, noise);
     }
     else if (c==0 && g==1){
-        updateNoisyIntegrateAll(&Neuron::binaryActiv);
+        updateNoisyIntegrateAll(&Neuron::binaryActiv, noise);
     }
     else if (c==1 && g==0){
-        updateNoisy(&Neuron::sigmActiv);
+        updateNoisy(&Neuron::sigmActiv, noise);
     }
     else{
-        updateNoisy(&Neuron::binaryActiv);
+        updateNoisy(&Neuron::binaryActiv, noise);
     }
 }
 

@@ -232,7 +232,7 @@ void Neuron::updateRK4IntegrateAll(double (Neuron::*f)(double)){
 }
 
 
-void Neuron::updateEulerNoisy(double (Neuron::*f)(double)){
+void Neuron::updateEulerNoisy(double (Neuron::*f)(double), double noise_strength){
     update_count++;
 
     double RHS = computeRHS(this->t,this->x,(f));
@@ -240,7 +240,7 @@ void Neuron::updateEulerNoisy(double (Neuron::*f)(double)){
     double noise = rand_normal(0,sqrt(h));
 
     t += h;
-    x = x + RHS + noise;
+    x = x + RHS + noise_strength*noise;
 
     //recording
     x_data.push_back(x);
@@ -248,7 +248,7 @@ void Neuron::updateEulerNoisy(double (Neuron::*f)(double)){
 }
 
 
-void Neuron::updateEulerNoisyIntegrateAll(double (Neuron::*f)(double)){
+void Neuron::updateEulerNoisyIntegrateAll(double (Neuron::*f)(double), double noise_strength){
     update_count++;
 
     double RHS = computeRHSIntegrateAll(this->t,this->x,(f));
@@ -256,7 +256,7 @@ void Neuron::updateEulerNoisyIntegrateAll(double (Neuron::*f)(double)){
     double noise = rand_normal(0,sqrt(h));
 
     t += h;
-    x = x + RHS + noise;
+    x = x + RHS + noise_strength*noise;
 
     //recording
     x_data.push_back(x);

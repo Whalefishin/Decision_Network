@@ -29,6 +29,7 @@ struct Data{
     vector<double> neuron_vector;
     vector<int> IC_vector;
     vector<double> attack_strengths_vector;
+    vector<double> noise_strength_vector;
 };
 
 //WorkLoop for W vs. N
@@ -66,7 +67,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
                                     double IC = 0.1 + 0.8/num_IC * l;
-                                    Network network_3D(custom_data.N,W,1,0.1,n);
+                                    Network network_3D(custom_data.N,W,1,0.01,n);
                                     network_3D.constructAllToAllNetwork();
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
@@ -139,7 +140,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
                                     double IC = 0.1 + 0.8/num_IC * l;
-                                    Network network_3D(neuron_count,W,1,0.1,n);
+                                    Network network_3D(neuron_count,W,1,0.01,n);
                                     network_3D.constructAllToAllNetwork();
                                     network_3D.initializeWithChoice(dist,b,IC,custom_data.diff);
                                     for (int k = 0;k<custom_data.update_times;k++){
@@ -292,7 +293,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
                                     double IC = 0.1 + 0.8/num_IC * l;
-                                    Network network_3D(custom_data.N,W,1,0.1,n,custom_data.k);
+                                    Network network_3D(custom_data.N,W,1,0.01,n,custom_data.k);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructRegularNetwork(custom_data.k);
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
@@ -370,7 +371,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
                                     double IC = 0.1 + 0.8/num_IC * l;
-                                    Network network_3D(custom_data.N,W,1,0.1,n,custom_data.p*custom_data.N);
+                                    Network network_3D(custom_data.N,W,1,0.01,n,custom_data.p*custom_data.N);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructRandomNetwork(custom_data.p);
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
@@ -610,7 +611,9 @@ void workLoop_NoiseSW(Data custom_data, vector<vector<double> >& N_Vector,
                 for (int s=0;s<custom_data.sep_gain;s++){
                     for (int n=0;n<custom_data.normalization;n++){
                         for (int b=0;b<custom_data.biased_IC;b++){
-                            for (int dist=0;dist<2;dist++){
+                            for (int dist=0;dist<1;dist++){
+                              for (int noise=0;noise< custom_data.noise_strength_vector.size();noise++){
+                                double noise_strength = custom_data.noise_strength_vector[noise];
                                 int num_IC = custom_data.IC_vector[b];
                                 double Acc_sum =0; //IC avg.
                                 double Acc_Mean = 0;
@@ -625,7 +628,7 @@ void workLoop_NoiseSW(Data custom_data, vector<vector<double> >& N_Vector,
                                     network_3D.constructSmallWorldNetwork(k,custom_data.p);
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
-                                        network_3D.updateNoisyWithChoice(s,g);
+                                        network_3D.updateNoisyWithChoice(s,g, noise_strength);
                                         if (k==custom_data.update_times-1){
                                             network_3D.computeAccuracy();
                                         }
@@ -651,6 +654,7 @@ void workLoop_NoiseSW(Data custom_data, vector<vector<double> >& N_Vector,
                                 mtx.unlock();
                         //update index out of the simulation loop
                                 index++;
+                              }
                             }
                         }
                     }
@@ -674,7 +678,7 @@ int main(){
     bool run_W_Random = false;
     bool run_W_Attacked = false;
     bool run_W_AttackedA2A = false;
-    bool run_W_NoiseSW = true;
+    bool run_W_NoiseSW = false;
 
 
 
@@ -703,7 +707,8 @@ int main(){
 
 
         for (int t=0;t<update_times;t++){
-            network->updateIntegrateAll(&Neuron::sigmActiv);
+            //network->updateIntegrateAll(&Neuron::sigmActiv);
+            network->updateNoisyIntegrateAll(&Neuron::sigmActiv, 0);
             if (t == update_times-1){ //last loop, collect accuracy
                 network->computeAccuracy();
             }
@@ -909,7 +914,7 @@ int main(){
 
     int num_outer_loop_ult = 10;
     int num_inner_loop_ult = 14;
-    int update_times_ult = 1000;
+    int update_times_ult = 10000;
     //double diff_ult = 0.5;
     vector<double> diff_vector;
     diff_vector.push_back(0.2);
@@ -1069,7 +1074,7 @@ int main(){
     if (run_W_Diff){
         int num_outer_loop_ult_2 = 10;
         int num_inner_loop_ult_2 = 14;
-        int update_times_ult_2 = 1000;
+        int update_times_ult_2 = 10000;
         //double diff_ult = 0.5;
 
         int num_Fair_IC_ult_2 = 10;
@@ -1334,9 +1339,9 @@ int main(){
 
     //From Regular to All-to-All
     if (run_W_Regular){
-        int num_outer_loop_ult_4 = 15;
+        int num_outer_loop_ult_4 = 14;
         int num_inner_loop_ult_4 = 14;
-        int update_times_ult_4 = 1000;
+        int update_times_ult_4 = 10000;
 
         int num_Fair_IC_ult_4 = 10;
         int num_Unfair_IC_ult_4 = 100;
@@ -1376,13 +1381,13 @@ int main(){
 
         for (int i=1;i<=num_outer_loop_ult_4;i++){
             int k=0;
-            if (i <=5){
-              k = i*5;
+            if (i <=4){
+              k = i*2;
             }
             else{
-              k = (i-5)*30;
+              k = (i-4)*10;
             }
-            computing_data_4.N = 300;
+            computing_data_4.N = 100;
             computing_data_4.diff = 0;
             computing_data_4.p = 0;
             computing_data_4.k = k;
@@ -1473,9 +1478,9 @@ int main(){
 
     //From Random to All-to-All
     if (run_W_Random){
-        int num_outer_loop_ult_5 = 15;
+        int num_outer_loop_ult_5 = 14;
         int num_inner_loop_ult_5 = 14;
-        int update_times_ult_5 = 500;
+        int update_times_ult_5 = 10000;
 
         int num_Fair_IC_ult_5 = 10;
         int num_Unfair_IC_ult_5 = 100;
@@ -1515,15 +1520,15 @@ int main(){
 
         for (int i=1;i<=num_outer_loop_ult_5;i++){
             double p =0;
-            if (i<=5){
-                p = i*5/300;
+            if (i<=4){
+                p = i*2.0/100;
             }
             else{
-                p = (i-5)*0.1;
+                p = (i-4)*0.1;
             }
 
 
-            computing_data_5.N = 300;
+            computing_data_5.N = 100;
             computing_data_5.diff = 0;
             computing_data_5.p = p;
             computing_data_5.k = 0;
@@ -1946,14 +1951,15 @@ int main(){
     }
 
 
-    //Behold one last time, the ultimate version for W vs. P
+    //W vs. Noisy SW
     if (run_W_NoiseSW){
         int gain_type_local = 2;
-        int sep_gain_local = 2;
+        int sep_gain_local = 1;
         int normalization_local = 2;
-        int biased_IC_local = 2;
+        int biased_IC_local = 1;
         int diff_count_local = 3;
-        int distributed_input_local = 2;
+        int distributed_input_local = 1;
+        int noise_strength_count = 8;
         int index_local = 0;
 
         int num_outer_loop_local = 11;
@@ -1964,6 +1970,12 @@ int main(){
         diff_vector_local.push_back(0.2);
         diff_vector_local.push_back(0.5);
         diff_vector_local.push_back(0.8);
+
+        vector<double> noise_strength_vector;
+        for(int i=0;i<noise_strength_count;i++){
+          double strength = 1.0/32.0 * pow(2,i);
+          noise_strength_vector.push_back(strength);
+        }
 
         int num_neuron_count_local = 3;
         vector<double> num_neuron_vector_local;
@@ -1984,13 +1996,13 @@ int main(){
         gain_names_local.push_back("_Sigm");
         gain_names_local.push_back("_Binary");
         sep_names_local.push_back("_IntAll");
-        sep_names_local.push_back("_Sep");
+        //sep_names_local.push_back("_Sep");
         norm_names_local.push_back("_YesNorm");
         norm_names_local.push_back("_NoNorm");
         biased_names_local.push_back("_Fair");
-        biased_names_local.push_back("_Unfair");
+        //biased_names_local.push_back("_Unfair");
         dist_names_local.push_back("_NoDist");
-        dist_names_local.push_back("_YesDist");
+        //dist_names_local.push_back("_YesDist");
 
         string base_name_local = "W_NoiseSW";
 
@@ -2011,7 +2023,7 @@ int main(){
         vector<vector<double> > RT_Var_Vector;
 
         for (int i=0;i<diff_count_local*gain_type_local*sep_gain_local*normalization_local*biased_IC_local
-          *distributed_input_local;i++){
+          *distributed_input_local*noise_strength_count;i++){
             vector<double> toPush;
             N_Vector.push_back(toPush);
             P_Vector.push_back(toPush);
@@ -2068,24 +2080,27 @@ int main(){
                     for (int n=0;n<normalization_local;n++){
                         for (int b=0;b<biased_IC_local;b++){
                             for (int dist=0;dist<distributed_input_local;dist++){
+                              for (int noise = 0;noise< noise_strength_count;noise++){
+                                string noise_strength_name = to_string(noise_strength_vector[noise]);
+                                noise_strength_name.erase ( noise_strength_name.find_last_not_of('0') + 1, std::string::npos );
                                 string filename1 = "Data/" + base_name_2 +"_N"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b]+ dist_names_local[dist] + diff_names_local[d] + ".txt";
+                                + norm_names_local[n] + biased_names_local[b]+ dist_names_local[dist] + diff_names_local[d] + "_NoiseStrength=" + noise_strength_name + ".txt";
                                 string filename2 = "Data/" +base_name_2 +"_W"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b]+dist_names_local[dist] + diff_names_local[d] +  ".txt";
+                                + norm_names_local[n] + biased_names_local[b]+dist_names_local[dist] + diff_names_local[d] +  "_NoiseStrength=" + noise_strength_name + ".txt";
                                 string filename3 = "Data/" +base_name_2 +"_Diff"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b]+dist_names_local[dist] + diff_names_local[d] +  ".txt";
+                                + norm_names_local[n] + biased_names_local[b]+dist_names_local[dist] + diff_names_local[d] +  "_NoiseStrength=" + noise_strength_name + ".txt";
                                 string filename4 = "Data/" +base_name_2 +"_Acc"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b]+dist_names_local[dist] + diff_names_local[d] +  ".txt";
+                                + norm_names_local[n] + biased_names_local[b]+dist_names_local[dist] + diff_names_local[d] + "_NoiseStrength=" + noise_strength_name +  ".txt";
                                 string filename5 = "Data/" +base_name_2 +"_RT"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + ".txt";
+                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + "_NoiseStrength=" + noise_strength_name + ".txt";
                                 string filename6 = "Data/" +base_name_2 +"_Acc_Var"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + ".txt";
+                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + "_NoiseStrength=" + noise_strength_name + ".txt";
                                 string filename7 = "Data/" +base_name_2 +"_RT_Var"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + ".txt";
+                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + "_NoiseStrength=" + noise_strength_name + ".txt";
                                 string filename8 = "Data/" +base_name_2 +"_P"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + ".txt";
+                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] +"_NoiseStrength=" + noise_strength_name +  ".txt";
                                 string filename9 = "Data/" +base_name_2 +"_AccMean"+ gain_names_local[g] + sep_names_local[s]
-                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + ".txt";
+                                + norm_names_local[n] + biased_names_local[b] + dist_names_local[dist] + diff_names_local[d] + "_NoiseStrength=" + noise_strength_name + ".txt";
                                 ofstream ToWrite1(filename1);
                                 ofstream ToWrite2(filename2);
                                 ofstream ToWrite3(filename3);
@@ -2108,6 +2123,7 @@ int main(){
                                     ToWrite9 << AccMean_Vector[index][i] << endl;
                                 }
                                 index++;
+                              }
                             }
                         }
                     }

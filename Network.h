@@ -38,9 +38,9 @@ class Network{
     void computeAccuracy();
     void computeAccuracy(int k);
     //update with noise.
-    void updateNoisyIntegrateAll(double (Neuron::*f)(double));
-    void updateNoisy(double (Neuron::*f)(double));
-    void updateNoisyWithChoice(int c, int g);
+    void updateNoisyIntegrateAll(double (Neuron::*f)(double), double noise);
+    void updateNoisy(double (Neuron::*f)(double), double noise);
+    void updateNoisyWithChoice(int c, int g, double noise);
 
     void initializeFairICYesDist(double IC, double diff);
     void initializeFairICNoDist(double IC, double diff);
