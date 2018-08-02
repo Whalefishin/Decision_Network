@@ -71,7 +71,7 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                                     network_3D.constructAllToAllNetwork();
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
-                                        network_3D.updateWithChoice(s,g);
+                                        network_3D.updateWithChoice(s,g,0);
                                         if (k==custom_data.update_times-1){
                                             network_3D.computeAccuracy();
                                         }
@@ -144,7 +144,7 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                                     network_3D.constructAllToAllNetwork();
                                     network_3D.initializeWithChoice(dist,b,IC,custom_data.diff);
                                     for (int k = 0;k<custom_data.update_times;k++){
-                                        network_3D.updateWithChoice(s,g);
+                                        network_3D.updateWithChoice(s,g,0);
                                         if (k==custom_data.update_times-1){
                                             network_3D.computeAccuracy();
                                         }
@@ -221,7 +221,7 @@ void workLoop_3(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                     network_3D.constructSmallWorldNetwork(k,custom_data.p);
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
-                                        network_3D.updateWithChoice(s,g);
+                                        network_3D.updateWithChoice(s,g,0);
                                         if (k==custom_data.update_times-1){
                                             network_3D.computeAccuracy();
                                         }
@@ -298,7 +298,7 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
                                     network_3D.constructRegularNetwork(custom_data.k);
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
-                                        network_3D.updateWithChoice(s,g);
+                                        network_3D.updateWithChoice(s,g,0);
                                         if (k==custom_data.update_times-1){
                                             network_3D.computeAccuracy();
                                         }
@@ -376,7 +376,7 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                                     network_3D.constructRandomNetwork(custom_data.p);
                                     network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                     for (int k = 0;k<custom_data.update_times;k++){
-                                        network_3D.updateWithChoice(s,g);
+                                        network_3D.updateWithChoice(s,g,0);
                                         if (k==custom_data.update_times-1){
                                             network_3D.computeAccuracy();
                                         }
@@ -459,7 +459,7 @@ void workLoop_attack(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                         network_3D.constructSmallWorldNetworkAttacked(k,custom_data.p,attack,a_c);
                                         network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                         for (int k = 0;k<custom_data.update_times;k++){
-                                            network_3D.updateWithChoice(s,g);
+                                            network_3D.updateWithChoice(s,g,0);
                                             if (k==custom_data.update_times-1){
                                                 network_3D.computeAccuracy();
                                             }
@@ -543,7 +543,7 @@ void workLoop_attackA2A(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                         //network_3D.constructSmallWorldNetworkAttacked(k,custom_data.p,attack,a_c);
                                         network_3D.initializeWithChoice(dist,b,IC,diff_ult);
                                         for (int k = 0;k<custom_data.update_times;k++){
-                                            network_3D.updateWithChoice(s,g);
+                                            network_3D.updateWithChoice(s,g,0);
                                             if (k==custom_data.update_times-1){
                                                 network_3D.computeAccuracy();
                                             }
@@ -623,7 +623,8 @@ void workLoop_NoiseSW(Data custom_data, vector<vector<double> >& N_Vector,
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
                                     //double IC = 0.1 + 0.8/num_IC * l;
-                                    double IC = 0.1 + 0.8/num_IC*10 * ((l%10)+1);
+                                    //double IC = 0.1 + 0.8/num_IC*10 * ((l%10)+1);
+                                    double IC = 0.5;
                                     Network network_3D(custom_data.N,W,1,0.01,n,k);
                                     //network_3D.constructAllToAllNetwork();
                                     network_3D.constructSmallWorldNetwork(k,custom_data.p);
@@ -679,7 +680,7 @@ int main(){
     bool run_W_Random = false;
     bool run_W_Attacked = false;
     bool run_W_AttackedA2A = false;
-    bool run_W_NoiseSW = true;
+    bool run_W_NoiseSW = false;
 
 
 
@@ -688,10 +689,10 @@ int main(){
 
 
         int single_Network_neurons = 300;
-        double w = 1;
+        double w = 1.5;
         int k = 15;
         double dt = 0.01;
-        int update_times = 0;
+        int update_times = 20000;
 
         Network* network = new Network(single_Network_neurons,w,1,dt,1,k);
 
@@ -699,8 +700,8 @@ int main(){
 
         //network->constructAllToAllNetwork();
         //network->constructRandomNetwork(connection_prob);
-        network->constructSmallWorldNetwork(k,0.01);
-        //network->constructRegularNetwork(k);
+        //network->constructSmallWorldNetwork(k,0.01);
+        network->constructRegularNetwork(k);
 
 
         //network->initializeRandomICYesDist(0.2);
@@ -708,7 +709,7 @@ int main(){
 
 
         for (int t=0;t<update_times;t++){
-            network->updateIntegrateAll(&Neuron::sigmActiv);
+            network->updateIntegrateAll(&Neuron::sigmActiv,0);
             //network->updateNoisyIntegrateAll(&Neuron::sigmActiv, 0);
             if (t == update_times-1){ //last loop, collect accuracy
                 network->computeAccuracy();
@@ -779,7 +780,7 @@ int main(){
                     scaling_network.initializeFairICYesDist(IC,0.8);
                     //simulate
                     for (int t=0;t<update_times_scaling;t++){
-                        scaling_network.updateIntegrateAll(&Neuron::sigmActiv);
+                        scaling_network.updateIntegrateAll(&Neuron::sigmActiv,0);
                         if (t==update_times_scaling-1){
                             scaling_network.computeAccuracy();
                         }
@@ -823,7 +824,7 @@ int main(){
             network_3D.initializeFairICNoDist(1.0,diff);
             //network_3D.initialize(0.5);
             for (int k = 0;k<update_times_3D;k++){
-                network_3D.updateIntegrateAll(&Neuron::sigmActiv);
+                network_3D.updateIntegrateAll(&Neuron::sigmActiv,0);
                 if (k==update_times_3D-1){
                     network_3D.computeAccuracy();
                 }
@@ -881,7 +882,7 @@ int main(){
                 network_3D.initializeFairICNoDist(IC,diff);
                 //network_3D.initialize(0.5);
                 for (int k = 0;k<update_times_3D_AVG_Fair;k++){
-                    network_3D.updateIntegrateAll(&Neuron::sigmActiv);
+                    network_3D.updateIntegrateAll(&Neuron::sigmActiv,0);
                     if (k==update_times_3D_AVG_Fair-1){
                         network_3D.computeAccuracy();
                     }
@@ -1974,7 +1975,7 @@ int main(){
 
         vector<double> noise_strength_vector;
         for(int i=0;i<noise_strength_count;i++){
-          double strength = 1.0/128.0 * pow(2,i);
+          double strength = 1.0/256.0 * pow(2,i);
           noise_strength_vector.push_back(strength);
         }
 

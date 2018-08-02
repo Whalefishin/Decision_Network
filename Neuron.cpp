@@ -24,7 +24,7 @@ double x_0, double t_0, double h){
     jump_ratio = 10;
     jump_variation_allowance = 0.1;
     prev_jump_peak = 0;
-    x_threshold = 0.7;
+    x_threshold = 0.8;
 
     x_data.push_back(x);
     t_data.push_back(t);

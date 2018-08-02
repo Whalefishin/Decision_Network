@@ -31,10 +31,9 @@ class Network{
     bool isConnected(int n1, int n2);
     vector<Neuron*> getNeighbors(Neuron* n);
 
-    void update(double (Neuron::*f)(double));
-    void update(double (Neuron::*f)(double),int c); //update the whole network one step forward
-    void updateIntegrateAll(double (Neuron::*f)(double)); //gain fcn incoporates evidence
-    void updateWithChoice(int c, int g);
+    void update(double (Neuron::*f)(double), int RT_choice);
+    void updateIntegrateAll(double (Neuron::*f)(double), int RT_choice); //gain fcn incoporates evidence
+    void updateWithChoice(int c, int g, int RT_choice);
     void computeAccuracy();
     void computeAccuracy(int k);
     //update with noise.
