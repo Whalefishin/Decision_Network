@@ -774,6 +774,7 @@ int main(){
     bool run_W_Attacked = false;
     bool run_W_AttackedA2A = false;
     bool run_W_NoiseSW = false;
+    bool run_W_NoiseA2A = false;
 
 
 
@@ -2338,7 +2339,7 @@ int main(){
             computing_data_local.neuron_vector = num_neuron_vector_local;
             computing_data_local.IC_vector = IC_vector_local;
             computing_data_local.noise_strength_vector = noise_strength_vector;
-            computing_data)local.distributed_input = distributed_input_local;
+            computing_data_local.distributed_input = distributed_input_local;
 
             threads_local.push_back(thread(workLoop_NoiseSW,computing_data_local,ref(N_Vector),ref(P_Vector), ref(W_Vector),
             ref(diff_Vector),ref(Acc_Vector),ref(AccMean_Vector),ref(RT_Vector), ref(Acc_Var_Vector),
