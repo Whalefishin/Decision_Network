@@ -82,7 +82,13 @@ void workLoop(Data custom_data, vector<vector<double> >& W_N_N_Vector,
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                     Acc_mean += max(0,network_3D.Acc_mean);
-                                    RT_sum += network_3D.RT;
+                                    if (network_3D.RT!=0){
+                                      RT_sum += network_3D.RT;
+                                    }
+                                    else{
+                                      cout << "Sth went wrong with RT" << endl;
+                                      RT_sum += custom_data.update_times*0.01;
+                                    }
                                 }
                                 //data collection
                                 //int index = b*1 + n*2 + s*4 + g*8;
@@ -155,7 +161,13 @@ void workLoop_2(Data custom_data, vector<vector<double> >& W_Diff_N_Vector,
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                     Acc_mean += max(0,network_3D.Acc_mean);
-                                    RT_sum += network_3D.RT;
+                                    if (network_3D.RT!=0){
+                                      RT_sum += network_3D.RT;
+                                    }
+                                    else{
+                                      cout << "Sth went wrong with RT" << endl;
+                                      RT_sum += custom_data.update_times*0.01;
+                                    }
                                 }
                                 //data collection
                                 //int index = b*1 + n*2 + s*4 + g*8;
@@ -317,7 +329,13 @@ void workLoop_4(Data custom_data, vector<vector<double> >& W_Regular_N_Vector,
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                     Acc_Mean += max(0,network_3D.Acc_mean);
-                                    RT_sum += network_3D.RT;
+                                    if (network_3D.RT!=0){
+                                      RT_sum += network_3D.RT;
+                                    }
+                                    else{
+                                      cout << "Sth went wrong with RT" << endl;
+                                      RT_sum += custom_data.update_times*0.01;
+                                    }
                                 }
                                 //data collection
                                 //int index = b*1 + n*2 + s*4 + g*8;
@@ -395,7 +413,13 @@ void workLoop_5(Data custom_data, vector<vector<double> >& W_Random_N_Vector,
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                     Acc_mean += max(0,network_3D.Acc_mean);
-                                    RT_sum += network_3D.RT;
+                                    if (network_3D.RT!=0){
+                                      RT_sum += network_3D.RT;
+                                    }
+                                    else{
+                                      cout << "Sth went wrong with RT" << endl;
+                                      RT_sum += custom_data.update_times*0.01;
+                                    }
                                 }
                                 //data collection
                                 //int index = b*1 + n*2 + s*4 + g*8;
@@ -435,7 +459,7 @@ void workLoop_attack(Data custom_data, vector<vector<double> >& W_P_N_Vector,
     vector<vector<double> >& W_P_Acc_Var_Vector,
         vector<vector<double> >& W_P_RT_Var_Vector){
 
-    int k =30;
+    int k =15;
 
     for (int j=1;j<=custom_data.num_inner_loop_ult;j++){
         double W = 0;
@@ -463,7 +487,8 @@ void workLoop_attack(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                     vector<double> variance_Acc;
                                     vector<double> variance_RT;
                                     for (int l=1;l<=num_IC;l++){
-                                        double IC = 0.1 + 0.8/num_IC * l;
+                                        //double IC = 0.1 + 0.8/num_IC * l;
+                                        double IC = 0.1 + 0.8/num_IC*10 * ((l%10)+1);
                                         Network network_3D(custom_data.N,W,1,0.01,n,k);
                                         //network_3D.constructAllToAllNetwork();
                                         network_3D.constructSmallWorldNetworkAttacked(k,custom_data.p,attack,a_c);
@@ -478,7 +503,13 @@ void workLoop_attack(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                         variance_RT.push_back(network_3D.RT);
                                         Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                         Acc_Mean += max(0,network_3D.Acc_mean);
-                                        RT_sum += network_3D.RT;
+                                        if (network_3D.RT!=0){
+                                          RT_sum += network_3D.RT;
+                                        }
+                                        else{
+                                          cout << "Sth went wrong with RT" << endl;
+                                          RT_sum += custom_data.update_times*0.01;
+                                        }
                                     }
                                     //data collection
                                     //int index = b*1 + n*2 + s*4 + g*8;
@@ -562,11 +593,16 @@ void workLoop_attackA2A(Data custom_data, vector<vector<double> >& W_P_N_Vector,
                                         variance_RT.push_back(network_3D.RT);
                                         Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                         Acc_Mean += max(0,network_3D.Acc_mean);
-                                        RT_sum += network_3D.RT;
+                                        if (network_3D.RT!=0){
+                                          RT_sum += network_3D.RT;
+                                        }
+                                        else{
+                                          cout << "Sth went wrong with RT" << endl;
+                                          RT_sum += custom_data.update_times*0.01;
+                                        }
                                     }
                                     //data collection
                                     //int index = b*1 + n*2 + s*4 + g*8;
-                                    cout << "collection" << endl;
                                     mtx.lock();
                                     W_P_N_Vector[index].push_back(custom_data.N);
                                     W_P_P_Vector[index].push_back(custom_data.p);
@@ -649,7 +685,13 @@ void workLoop_NoiseSW(Data custom_data, vector<vector<double> >& N_Vector,
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                     Acc_Mean += max(0,network_3D.Acc_mean);
-                                    RT_sum += network_3D.RT;
+                                    if (network_3D.RT!=0){
+                                      RT_sum += network_3D.RT;
+                                    }
+                                    else{
+                                      cout << "Sth went wrong with RT" << endl;
+                                      RT_sum += custom_data.update_times*0.01;
+                                    }
                                 }
                                 //data collection
                                 //int index = b*1 + n*2 + s*4 + g*8;
@@ -733,7 +775,13 @@ void workLoop_NoiseA2A(Data custom_data, vector<vector<double> >& N_Vector,
                                     variance_RT.push_back(network_3D.RT);
                                     Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
                                     Acc_Mean += max(0,network_3D.Acc_mean);
-                                    RT_sum += network_3D.RT;
+                                    if (network_3D.RT!=0){
+                                      RT_sum += network_3D.RT;
+                                    }
+                                    else{
+                                      cout << "Sth went wrong with RT" << endl;
+                                      RT_sum += custom_data.update_times*0.01;
+                                    }
                                 }
                                 //data collection
                                 //int index = b*1 + n*2 + s*4 + g*8;
@@ -768,7 +816,7 @@ int main(){
 
     bool run_W_N = false;
     bool run_W_Diff = false;
-    bool run_W_P = true;
+    bool run_W_P = false;
     bool run_W_Regular = false;
     bool run_W_Random = false;
     bool run_W_Attacked = false;
@@ -782,19 +830,20 @@ int main(){
     srand(4);
 
 
-        int single_Network_neurons = 300;
-        double w = 1.7;
+        int single_Network_neurons = 10;
+        double w = 10;
         int k = 15;
         double dt = 0.01;
         int update_times = 0;
 
-        Network* network = new Network(single_Network_neurons,w,1,dt,1,k);
+        //Network* network = new Network(single_Network_neurons,w,1,dt,0,k);
+        Network* network = new Network(single_Network_neurons,w,1,dt,0);
 
         double connection_prob = (double)k/single_Network_neurons;
 
-        //network->constructAllToAllNetwork();
+        network->constructAllToAllNetwork();
         //network->constructRandomNetwork(connection_prob);
-        network->constructSmallWorldNetwork(k,0.001);
+        //network->constructSmallWorldNetwork(k,0.001);
         //network->constructRegularNetwork(k);
 
 
@@ -803,8 +852,8 @@ int main(){
 
 
         for (int t=0;t<update_times;t++){
-            network->updateIntegrateAll(&Neuron::sigmActiv,0);
-            //network->updateNoisyIntegrateAll(&Neuron::sigmActiv, 0);
+            //network->updateIntegrateAll(&Neuron::sigmActiv,0);
+            network->updateNoisyIntegrateAll(&Neuron::sigmActiv, 0);
             if (t == update_times-1){ //last loop, collect accuracy
                 network->computeAccuracy();
             }
@@ -933,68 +982,69 @@ int main(){
 
 
     //3D with averaged fair IC
-    int num_outer_loop_AVG_Fair = 11;
-    int num_inner_loop_AVG_Fair = 14;
-    int update_times_3D_AVG_Fair = 0;
-    int num_IC_AVG_Fair = 10; //number of IC to avg.
+      int num_outer_loop_AVG_Fair = 10;
+      int num_inner_loop_AVG_Fair = 14;
+      int update_times_3D_AVG_Fair = 10000;
+      int num_IC_AVG_Fair = 10; //number of IC to avg.
 
-    vector<double> w_Vector_3D_AVG_Fair;
-    vector<double> N_Vector_3D_AVG_Fair;
-    vector<double> diff_Vector_3D_AVG_Fair;
-    vector<double> Acc_Vector_3D_AVG_Fair;
-    vector<double> RT_Vector_3D_AVG_Fair;
-    vector<double> AccMean_Vector_3D_AVG_Fair;
-    vector<double> p_Vector_3D_AVG_Fair;
+      vector<double> w_Vector_3D_AVG_Fair;
+      vector<double> N_Vector_3D_AVG_Fair;
+      vector<double> diff_Vector_3D_AVG_Fair;
+      vector<double> Acc_Vector_3D_AVG_Fair;
+      vector<double> RT_Vector_3D_AVG_Fair;
+      vector<double> AccMean_Vector_3D_AVG_Fair;
+      vector<double> p_Vector_3D_AVG_Fair;
 
 
-    for (int i=1;i<=num_outer_loop_AVG_Fair;i++){
-        //double N = 10;
-        double N = 300;
-        int k = 15;
-        double p = pow(2,-i+1);
-        //double diff = (i-1)*0.1;
-        double diff = 0.8;
-        for (int j=1;j<=num_inner_loop_AVG_Fair;j++){
-            double Acc_sum =0; //IC avg.
-            double RT_sum = 0; //IC avg.
-            double AccMean_sum = 0;
-            double W = 0;
-            if (j <=4){
-              W = (j-1)*0.25;
-            }
-            else{
-              W = (double)(j-4);
-            }
-            for (int l=1;l<=num_IC_AVG_Fair;l++){
-                double IC = 0.1 + 0.8/num_IC_AVG_Fair * l;
-                //double IC = l*0.09;
-                //double w = 1.0;
-                //double diff = (j-1)*0.1;
-                Network network_3D(N,W,1,0.01,1,k);
-                //network_3D.constructAllToAllNetwork();
-                network_3D.constructSmallWorldNetwork(k,p);
-                network_3D.initializeFairICNoDist(IC,diff);
-                //network_3D.initialize(0.5);
-                for (int k = 0;k<update_times_3D_AVG_Fair;k++){
-                    network_3D.updateIntegrateAll(&Neuron::sigmActiv,0);
-                    if (k==update_times_3D_AVG_Fair-1){
-                        network_3D.computeAccuracy();
-                    }
-                }
-                Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
-                AccMean_sum += max(0,network_3D.Acc_mean);
-                RT_sum += network_3D.RT;
-            }
-            p_Vector_3D_AVG_Fair.push_back(p);
-            N_Vector_3D_AVG_Fair.push_back(N);
-            w_Vector_3D_AVG_Fair.push_back(W);
-            diff_Vector_3D_AVG_Fair.push_back(diff);
-            Acc_Vector_3D_AVG_Fair.push_back(Acc_sum/num_IC_AVG_Fair);
-            RT_Vector_3D_AVG_Fair.push_back(RT_sum/num_IC_AVG_Fair);
-            AccMean_Vector_3D_AVG_Fair.push_back(AccMean_sum/num_IC_AVG_Fair);
-        }
-    }
-
+      for (int i=1;i<=num_outer_loop_AVG_Fair;i++){
+          //double N = 10;
+          double N = 10*i;
+          int k = 100;
+          double p = pow(2,-i+1);
+          //double diff = (i-1)*0.1;
+          double diff = 0.8;
+          for (int j=1;j<=num_inner_loop_AVG_Fair;j++){
+              double Acc_sum =0; //IC avg.
+              double RT_sum = 0; //IC avg.
+              double AccMean_sum = 0;
+              double W = 0;
+              if (j <=4){
+                W = (j-1)*0.25;
+              }
+              else{
+                W = (double)(j-4);
+              }
+              for (int l=1;l<=num_IC_AVG_Fair;l++){
+                  double IC = 0.1 + 0.8/num_IC_AVG_Fair * l;
+                  //double IC = l*0.09;
+                  //double w = 1.0;
+                  //double diff = (j-1)*0.1;
+                  //Network network_3D(N,W,1,0.01,0,k);
+                  Network network_3D(N,W,1,0.01,0);
+                  network_3D.constructAllToAllNetwork();
+                  //network_3D.constructSmallWorldNetwork(k,p);
+                  network_3D.initializeFairICNoDist(IC,diff);
+                  //network_3D.initialize(0.5);
+                  for (int k = 0;k<update_times_3D_AVG_Fair;k++){
+                      //network_3D.updateIntegrateAll(&Neuron::sigmActiv,0);
+                      network_3D.updateNoisyIntegrateAll(&Neuron::sigmActiv, 1.0/16.0);
+                      if (k==update_times_3D_AVG_Fair-1){
+                          network_3D.computeAccuracy();
+                      }
+                  }
+                  Acc_sum += max(0,network_3D.Acc); //if Acc is neg, set to 0.
+                  AccMean_sum += max(0,network_3D.Acc_mean);
+                  RT_sum += network_3D.RT;
+              }
+              p_Vector_3D_AVG_Fair.push_back(p);
+              N_Vector_3D_AVG_Fair.push_back(N);
+              w_Vector_3D_AVG_Fair.push_back(W);
+              diff_Vector_3D_AVG_Fair.push_back(diff);
+              Acc_Vector_3D_AVG_Fair.push_back(Acc_sum/num_IC_AVG_Fair);
+              RT_Vector_3D_AVG_Fair.push_back(RT_sum/num_IC_AVG_Fair);
+              AccMean_Vector_3D_AVG_Fair.push_back(AccMean_sum/num_IC_AVG_Fair);
+          }
+      }
     //cout << "before ult" << endl;
 
 
@@ -1773,7 +1823,7 @@ int main(){
         int num_inner_loop_ult_attack = 14;
         int update_times_ult_attack = 10000;
 
-        int num_Fair_IC_ult_attack = 10;
+        int num_Fair_IC_ult_attack = 100;
         int num_Unfair_IC_ult_attack = 100;
         vector<int> IC_vector_attack;
         IC_vector_attack.push_back(num_Fair_IC_ult_attack);
