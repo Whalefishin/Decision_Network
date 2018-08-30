@@ -759,8 +759,8 @@ void workLoop_NoiseA2A(Data custom_data, vector<vector<double> >& N_Vector,
                                 vector<double> variance_RT;
                                 for (int l=1;l<=num_IC;l++){
                                     //double IC = 0.1 + 0.8/num_IC * l;
-                                    //double IC = 0.1 + 0.8/num_IC*10 * ((l%10)+1);
-                                    double IC = 0.5;
+                                    double IC = 0.1 + 0.8/num_IC*10 * ((l%10)+1);
+                                    //double IC = 0.5;
                                     Network network_3D(custom_data.N,W,1,0.01,n);
                                     network_3D.constructAllToAllNetwork();
                                     //network_3D.constructSmallWorldNetwork(k,custom_data.p);
@@ -814,7 +814,7 @@ int main(){
 
     //Controls which runs we want to do.
 
-    bool run_W_N = false;
+    bool run_W_N = true;
     bool run_W_Diff = false;
     bool run_W_P = false;
     bool run_W_Regular = false;
@@ -852,8 +852,8 @@ int main(){
 
 
         for (int t=0;t<update_times;t++){
-            //network->updateIntegrateAll(&Neuron::sigmActiv,0);
-            network->updateNoisyIntegrateAll(&Neuron::sigmActiv, 0);
+            network->updateIntegrateAll(&Neuron::binaryActiv,0);
+            //network->updateNoisyIntegrateAll(&Neuron::sigmActiv, 0);
             if (t == update_times-1){ //last loop, collect accuracy
                 network->computeAccuracy();
             }
@@ -984,7 +984,7 @@ int main(){
     //3D with averaged fair IC
       int num_outer_loop_AVG_Fair = 10;
       int num_inner_loop_AVG_Fair = 14;
-      int update_times_3D_AVG_Fair = 10000;
+      int update_times_3D_AVG_Fair = 0;
       int num_IC_AVG_Fair = 10; //number of IC to avg.
 
       vector<double> w_Vector_3D_AVG_Fair;
@@ -1058,7 +1058,7 @@ int main(){
     int distributed_input = 1;
     int index = 0;
 
-    int num_outer_loop_ult = 29;
+    int num_outer_loop_ult = 10;
     int num_inner_loop_ult = 21;
     int update_times_ult = 10000;
     //double diff_ult = 0.5;
@@ -1133,7 +1133,7 @@ int main(){
         Data computing_data;
 
         for (int i=1;i<=num_outer_loop_ult;i++){
-            double N = i+1;
+            double N = i*10;
             computing_data.N = N;
             computing_data.diff = 0;
             computing_data.p = 0;
@@ -2391,7 +2391,7 @@ int main(){
             computing_data_local.noise_strength_vector = noise_strength_vector;
             computing_data_local.distributed_input = distributed_input_local;
 
-            threads_local.push_back(thread(workLoop_NoiseSW,computing_data_local,ref(N_Vector),ref(P_Vector), ref(W_Vector),
+            threads_local.push_back(thread(workLoop_NoiseA2A,computing_data_local,ref(N_Vector),ref(P_Vector), ref(W_Vector),
             ref(diff_Vector),ref(Acc_Vector),ref(AccMean_Vector),ref(RT_Vector), ref(Acc_Var_Vector),
         ref(RT_Var_Vector)));
         }
@@ -2403,7 +2403,7 @@ int main(){
 
         //Data outputting
         cout <<"outputting" << endl;
-        string base_name_2 = "W_NoiseSW";
+        string base_name_2 = "W_NoiseA2A";
 
         index=0;
 
