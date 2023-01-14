@@ -1,4 +1,4 @@
-# Decision Networks
+# Decision Network
 
 This is the official code used in:
 
